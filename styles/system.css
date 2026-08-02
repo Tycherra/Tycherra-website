@@ -2018,6 +2018,34 @@ main {
   color: var(--dim);
 }
 
+/*  PART 6.1 — the honeypot. Moved off-screen rather than display:none,
+    so a bot that honours visibility still fills it, and pulled out of
+    the tab order and the accessibility tree. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/*  Errors render inside the panel in the system's own type. Never an
+    alert, never a red toast — PART 6.4. */
+.f__err {
+  min-height: 1.4em;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hot2);
+  transition: color 0.7s linear;
+}
+
+.send .ml-auto {
+  margin-left: auto;
+}
+
 /* the aside */
 .side {
   display: flex;

@@ -262,6 +262,20 @@
   background: linear-gradient(90deg, #a81030, #ffb627);
 }
 
+/* /404 — the live scatter field fills the section it sits in */
+.nf__field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.nf__field canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* ═══ 4 · THE PERSISTENT INSTRUMENTS — PART 3.4 ═══════════════════ */
 
 .wash {

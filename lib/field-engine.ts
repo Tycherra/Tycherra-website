@@ -42,6 +42,11 @@ export type FieldOptions = {
   /** live readouts */
   onReadout?: (bearing: string, nodes: string) => void;
   reduced: boolean;
+  /*  PART 8.3 — /404 runs the same engine with nothing to converge on.
+      Segments keep drifting on their own headings and never find the
+      point, the nodes never form, and the bearing ring is not drawn.
+      A field that cannot converge is the point of that page. */
+  scatter?: boolean;
 };
 
 type Cell = {
@@ -52,6 +57,8 @@ type Cell = {
   a: number;
   z: number;
   sc: number;
+  /** scatter only — the heading this segment drifts around */
+  seed: number;
 };
 
 type Box = {
@@ -66,7 +73,7 @@ type Box = {
 const TAU = Math.PI * 2;
 
 export function createField(opts: FieldOptions): FieldApi {
-  const { canvas, host, typeSelector, onReadout, reduced } = opts;
+  const { canvas, host, typeSelector, onReadout, reduced, scatter = false } = opts;
   const g = canvas.getContext("2d");
   if (!g) {
     return {
@@ -173,6 +180,7 @@ export function createField(opts: FieldOptions): FieldApi {
             a: Math.random() * TAU,
             z: L.z,
             sc: L.sc,
+            seed: Math.random() * TAU,
           });
         }
       }
@@ -210,7 +218,11 @@ export function createField(opts: FieldOptions): FieldApi {
       const dx = A.x - cx;
       const dy = A.y - cy;
       const d = Math.hypot(dx, dy);
-      let want = Math.atan2(dy, dx);
+      let want = scatter
+        ? /* no bearing to take: each segment wanders around the heading
+             it woke up with, and never arrives anywhere */
+          c.seed + Math.sin(t * 0.55 + c.ox * 0.006) * 1.1
+        : Math.atan2(dy, dx);
 
       /* 4 — bend around the type */
       const tp = typePush(cx, cy);
@@ -244,7 +256,9 @@ export function createField(opts: FieldOptions): FieldApi {
       while (df < -Math.PI) df += TAU;
       c.a += df * turn;
 
-      const p = Math.max(0, 1 - d / reach);
+      const p = scatter
+        ? 0.16 + Math.sin(c.seed * 3.1) * 0.06
+        : Math.max(0, 1 - d / reach);
       const dim = tp ? 1 - tp.k * 0.55 : 1;
       const L = gap * (0.17 + p * 0.54) * c.sc * (0.45 + intro * 0.55) * (1 - exit * 0.35);
       const col = ramp(p);
@@ -263,7 +277,8 @@ export function createField(opts: FieldOptions): FieldApi {
       g!.lineTo(cx + Math.cos(c.a) * L * 0.5, cy + Math.sin(c.a) * L * 0.5);
       g!.stroke();
 
-      if (c.z === 1 && d < gap * 4.6 && intro > 0.5 && !tp) near.push({ c, p });
+      if (!scatter && c.z === 1 && d < gap * 4.6 && intro > 0.5 && !tp)
+        near.push({ c, p });
     }
 
     /* 3 — connections where attention lands */
@@ -292,6 +307,10 @@ export function createField(opts: FieldOptions): FieldApi {
     }
 
     /* the ring — with a second, dashed ring when a mark is dropped */
+    if (scatter) {
+      if (++fr % 8 === 0 && onReadout) onReadout("---°", "NO FIX");
+      return;
+    }
     g!.save();
     g!.translate(A.x, A.y);
     g!.globalAlpha = intro * (1 - exit * 0.6);
@@ -373,7 +392,7 @@ export function createField(opts: FieldOptions): FieldApi {
     if (e.clientY > r.bottom) return;
     M.x = e.clientX - r.left;
     M.y = e.clientY - r.top;
-    if (intro < 0.9 || A.locked) return;
+    if (scatter || intro < 0.9 || A.locked) return;
     A.free = false;
     A.tx = M.x;
     A.ty = M.y;
@@ -386,7 +405,7 @@ export function createField(opts: FieldOptions): FieldApi {
   /* ── 8 · click drops or lifts the mark ────────────────────────── */
   const onClick = (e: MouseEvent) => {
     if ((e.target as HTMLElement).closest("a,button")) return;
-    if (intro < 0.9) return;
+    if (scatter || intro < 0.9) return;
     const r = canvas.getBoundingClientRect();
     if (A.locked) {
       A.locked = false;

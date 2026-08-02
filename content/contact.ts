@@ -114,7 +114,7 @@ export const contact = {
         { k: "Where", v: "Bengaluru, India" },
         { k: "Hours", v: "09:30–19:00 IST" },
         { k: "Local time", v: null }, // live
-        { k: "Reply", v: "≤ 1 working day" },
+        { k: "Response", v: "≤ 1 working day" },
       ] as const,
     },
     working: {
