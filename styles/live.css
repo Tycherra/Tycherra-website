@@ -42,14 +42,17 @@
   opacity: 1;
 }
 
-/* C — character rise. Exactly one heading per page. .95s */
+/*  C — character rise. Exactly one heading per page.
+    Shortened from .95s: at that length, plus the stagger, the page
+    heading took over a second to finish arriving and read as slow to
+    load rather than as a reveal. The whole run now lands in ~0.75s. */
 .chr {
   display: inline-block;
   transform: translateY(0.62em) rotate(3.5deg);
   opacity: 0;
   transition:
-    transform 0.95s var(--e),
-    opacity 0.7s var(--e);
+    transform 0.62s var(--e),
+    opacity 0.42s var(--e);
 }
 
 .on .chr,

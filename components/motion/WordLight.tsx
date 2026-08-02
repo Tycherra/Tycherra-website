@@ -62,8 +62,6 @@ export function WordLight({
             }
             const el = document.createElement("w");
             el.textContent = tk;
-            /* the resting state, written where every other value is */
-            el.style.opacity = "0.12";
             frag.appendChild(el);
           });
           (n as ChildNode).replaceWith(frag);
@@ -74,7 +72,17 @@ export function WordLight({
       Array.from(q.childNodes).forEach(walk);
     }
 
-    const words = Array.from(q.querySelectorAll<HTMLElement>("w"));
+    /*  The gradient clause is the payoff of the sentence and it is
+        exempt: it loads lit and stays lit. Only the plain words are
+        driven, so the coloured words can never dim, flicker, or come
+        back — not even for a frame. They are set once, here, and the
+        driver never touches them again. */
+    const all = Array.from(q.querySelectorAll<HTMLElement>("w"));
+    for (const el of all) {
+      if (el.closest("em")) el.style.opacity = "1";
+    }
+    const words = all.filter((el) => !el.closest("em"));
+    for (const el of words) el.style.opacity = "0.12";
 
     if (reduced) {
       for (const el of words) el.style.opacity = "1";

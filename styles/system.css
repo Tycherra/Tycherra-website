@@ -400,26 +400,181 @@ main {
   }
 }
 
-/* Stage 1 carries a plain wrapped link row under 860px, so the site is
-   fully navigable on a phone before the sheet exists. Stage 2 replaces
-   all of this with the burger and the clip-path sheet. */
+/*  THE MOBILE SHEET — PART 3.1.
+    Under 860px the link row gives way to the burger and the sheet. */
+.burger {
+  display: none;
+  position: relative;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  margin-left: auto;
+  z-index: 61;
+  background: none;
+  cursor: pointer;
+}
+
+.burger i {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 1.5px;
+  background: var(--bone);
+  transition:
+    transform 0.5s var(--e),
+    background 0.5s var(--e);
+}
+
+.burger i:nth-child(1) {
+  top: 12px;
+}
+
+.burger i:nth-child(2) {
+  top: 18px;
+}
+
+body.menu .burger i:nth-child(1) {
+  transform: translateY(3px) rotate(45deg);
+  background: var(--hot2);
+}
+
+body.menu .burger i:nth-child(2) {
+  transform: translateY(-3px) rotate(-45deg);
+  background: var(--hot2);
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 58;
+  background: var(--void);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.8s var(--e);
+  display: flex;
+  align-items: flex-end;
+  padding: 0 var(--pad) clamp(40px, 9vh, 90px);
+  visibility: hidden;
+}
+
+.sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 90% 60% at 78% 18%,
+    color-mix(in srgb, var(--hot2) 22%, transparent),
+    transparent 66%
+  );
+}
+
+body.menu .sheet {
+  clip-path: inset(0 0 0 0);
+  visibility: visible;
+}
+
+.sheet__in {
+  position: relative;
+  width: 100%;
+}
+
+.sheet__l {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 13px 0;
+  background-image: var(--hairline);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 0;
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s var(--e),
+    transform 0.7s var(--e);
+}
+
+.sheet__l:last-of-type {
+  background-image: var(--hairline), var(--hairline);
+  background-position: 0 0, 0 100%;
+}
+
+.sheet__l em {
+  font-family: var(--disp);
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(30px, 10vw, 54px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  transition: color 0.4s;
+}
+
+.sheet__l:hover em,
+.sheet__l:focus-visible em,
+.sheet__l[aria-current="page"] em {
+  color: var(--hot2);
+}
+
+body.menu .sheet__l {
+  opacity: 1;
+  transform: none;
+}
+
+body.menu .sheet__l:nth-of-type(1) {
+  transition-delay: 0.16s;
+}
+
+body.menu .sheet__l:nth-of-type(2) {
+  transition-delay: 0.23s;
+}
+
+body.menu .sheet__l:nth-of-type(3) {
+  transition-delay: 0.3s;
+}
+
+body.menu .sheet__l:nth-of-type(4) {
+  transition-delay: 0.37s;
+}
+
+.sheet__ft {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 30px;
+  opacity: 0;
+  transition: opacity 0.6s var(--e) 0.5s;
+}
+
+body.menu .sheet__ft {
+  opacity: 1;
+}
+
+body.menu {
+  overflow: hidden;
+}
+
 @media (max-width: 860px) {
-  .nav {
-    flex-wrap: wrap;
-    gap: 10px 16px;
-    padding-block: 14px;
+  .burger {
+    display: block;
   }
 
+  /* the sheet owns navigation below this width */
   .nav__set {
-    order: 3;
-    width: 100%;
-    margin-left: 0;
-    margin-right: 0;
-    flex-wrap: wrap;
-    gap: 8px clamp(14px, 4vw, 24px);
-    justify-content: flex-start;
+    display: none;
   }
 
+  .nav {
+    padding-block: 15px;
+  }
+}
+
+@media (min-width: 861px) {
+  .sheet {
+    display: none;
+  }
 }
 
 /* ═══ 5 · PAGE HEAD ════════════════════════════════════════════════ */
@@ -1514,19 +1669,117 @@ main {
 
 .mt__viz {
   position: sticky;
-  top: 88px;
+  top: 84px;
   z-index: 1;
-  height: min(42vh, 300px);
+  aspect-ratio: 16 / 9;
+  height: auto;
   margin: 22px 0 8px;
 }
 
-/*  F3a — the sticky offset centres the canvas on the middle of the
-    viewport, which is where the active step sits. The previous offset
-    was measured from the canvas's own height and left it low. */
+/*  THE METHOD PLATE — the scroll-scrubbed clip.
+    A plate, not an embed: drawn brackets, a graticule, and a masked
+    edge so the rectangle dissolves into the surface instead of sitting
+    on top of it. PART 0.2 — a colour must never simply fill a box. */
+.mt__plate {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--raise);
+}
+
+.mt__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* graded toward the room: the clip is already warm, this keeps it
+     from reading brighter than anything else on the page */
+  filter: saturate(0.82) contrast(1.06) brightness(0.84);
+}
+
+/* the edges melt rather than butt against the void */
+.mt__edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 108% 104% at 50% 48%,
+      transparent 42%,
+      rgba(7, 7, 10, 0.55) 82%,
+      var(--void) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(7, 7, 10, 0.4),
+      transparent 22%,
+      transparent 78%,
+      rgba(7, 7, 10, 0.5)
+    );
+}
+
+.mt__grat {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(var(--dim-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dim-line) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.mt__frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mt__c {
+  position: absolute;
+  width: clamp(20px, 8%, 54px);
+  aspect-ratio: 1;
+  border: 1.2px solid var(--hot2);
+  opacity: 0.85;
+  transition: border-color 0.8s linear;
+}
+
+.mt__c--tl {
+  top: 0;
+  left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.mt__c--tr {
+  top: 0;
+  right: 0;
+  border-left: 0;
+  border-bottom: 0;
+}
+
+.mt__c--br {
+  bottom: 0;
+  right: 0;
+  border-left: 0;
+  border-top: 0;
+}
+
+.mt__c--bl {
+  bottom: 0;
+  left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+/*  The sticky offset centres the plate on the middle of the viewport,
+    which is where the active step sits. */
 @media (min-width: 1000px) {
   .mt__viz {
-    height: min(56vh, 420px);
-    top: calc(50vh - min(28vh, 210px));
+    aspect-ratio: 16 / 10;
+    max-height: min(58vh, 440px);
+    top: calc(50vh - min(29vh, 220px));
     margin: 0;
   }
 }

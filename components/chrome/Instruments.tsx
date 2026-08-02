@@ -126,7 +126,21 @@ export function Instruments({ from, to, lead = 0.22, seed }: Props) {
           as current arriving rather than as a drawing appearing. Every
           band is scrubbed by scroll, so the whole thing runs backwards
           when you scroll back up. */
-      const fy = H - 210;
+      /*  The circuit is laid out against the footer's real box, not a
+          fixed offset from the document bottom. At H - 210 the terminal
+          landed squarely on "Bengaluru, India" in the base row — a
+          small bright rectangle sitting on the type. It now ends above
+          the status rule with clearance, whatever the footer's height. */
+      const footer = document.querySelector<HTMLElement>(".ft");
+      const baseRow = document.querySelector<HTMLElement>(".ft__status");
+      const pageY = (el: HTMLElement) =>
+        el.getBoundingClientRect().top + window.scrollY;
+      const floor = baseRow
+        ? pageY(baseRow) - 34
+        : footer
+          ? pageY(footer) + 120
+          : H - 240;
+      const fy = floor - 178;
       const cx = W / 2;
       const bus = [0, 1, 2, 3].map((i) => ({
         y: fy + i * 26,
@@ -136,8 +150,8 @@ export function Instruments({ from, to, lead = 0.22, seed }: Props) {
         band: [0.7 + i * 0.055, 0.82 + i * 0.055] as [number, number],
       }));
 
-      const spineY = fy + 118;
-      const termY = spineY + 42;
+      const spineY = fy + 104;
+      const termY = spineY + 34;
 
       for (const b of bus) {
         /* in from both margins, turn, and drop onto the spine */
@@ -162,10 +176,10 @@ export function Instruments({ from, to, lead = 0.22, seed }: Props) {
       routes.push({
         d:
           `M${cx} ${spineY}L${cx} ${termY}` +
-          `M${cx - 24} ${termY}L${cx + 24} ${termY}` +
-          `M${cx - 24} ${termY}L${cx - 24} ${termY + 18}` +
-          `M${cx + 24} ${termY}L${cx + 24} ${termY + 18}` +
-          `M${cx - 24} ${termY + 18}L${cx + 24} ${termY + 18}`,
+          `M${cx - 26} ${termY}L${cx + 26} ${termY}` +
+          `M${cx - 26} ${termY}L${cx - 26} ${termY + 16}` +
+          `M${cx + 26} ${termY}L${cx + 26} ${termY + 16}` +
+          `M${cx - 26} ${termY + 16}L${cx + 26} ${termY + 16}`,
         band: [0.96, 1],
       });
       nodes.push([cx, spineY]);

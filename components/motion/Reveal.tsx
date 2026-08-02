@@ -60,7 +60,7 @@ export function Reveal({ scope = "main" }: { scope?: string }) {
           the run past the 1.2s ceiling. The delay is capped so the last
           character always starts within 240ms and the whole rise lands
           under 1.2s, whatever the heading says. */
-      const step = Math.min(38, 240 / Math.max(1, text.length - 1));
+      const step = Math.min(24, 150 / Math.max(1, text.length - 1));
       text.split("").forEach((c, i) => {
         if (c === " ") {
           el.appendChild(document.createTextNode(" "));
@@ -108,7 +108,11 @@ export function Reveal({ scope = "main" }: { scope?: string }) {
     targets.forEach((el, i) => {
       /* the hero runs on the loader's clock, not the observer's */
       if (el.closest(".hero")) return;
-      el.style.transitionDelay = `${(i % 3) * 70}ms`;
+      /*  the page heading carries its own per-character stagger; a
+          container delay on top of it only pushes the whole run later */
+      if (!el.hasAttribute("data-chars")) {
+        el.style.transitionDelay = `${(i % 3) * 70}ms`;
+      }
       pending.add(el);
       io.observe(el);
     });
