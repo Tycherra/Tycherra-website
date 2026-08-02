@@ -553,8 +553,10 @@ body.hv .ret__d {
 
 .st__q w {
   display: inline-block;
-  opacity: 0.12;
   transition: opacity 0.5s linear;
+  /*  No resting opacity here on purpose. components/motion/WordLight
+      owns every value a word ever takes, including .12, so a word can
+      never be painted by the stylesheet before the driver measures. */
 }
 
 /*  The prototype pinned the serif clause to opacity 1 in CSS while the

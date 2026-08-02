@@ -12,7 +12,8 @@ import { Clock } from "./Clock";
 
     STAGE 1 carries the wordmark with its bearing dial and ramp rule,
     the four links with the needle parked under the current route, the
-    live IST clock, and the Let's talk control.
+    live IST clock. The Let's talk pill is gone: it duplicated the
+    Contact link sitting immediately beside it.
 
     STAGE 2 adds: the sliding needle (hover, focus and route tracking),
     the scroll behaviour — transparent at the top, blurred past 80px,
@@ -23,7 +24,6 @@ import { Clock } from "./Clock";
 
 export function Nav() {
   const pathname = usePathname();
-  const onContact = pathname === "/contact";
 
   return (
     <nav className="nav" aria-label="Primary">
@@ -52,13 +52,6 @@ export function Nav() {
       </div>
 
       <Clock className="lb nav__clock" />
-
-      {!onContact && (
-        <Link href="/contact" className="talk">
-          <span>Let&rsquo;s talk</span>
-          <span aria-hidden="true">→</span>
-        </Link>
-      )}
     </nav>
   );
 }

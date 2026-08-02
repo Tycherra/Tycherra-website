@@ -125,6 +125,13 @@ export function createMethod(
 
   const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
+/*  F3c — the raw scroll fraction spent its first fifth doing almost
+    nothing visible, so the section read as unresponsive until you were
+    already past the first step. This front-loads the curve: the points
+    begin rearranging immediately and the back half still has room to
+    resolve. */
+const lead = (x: number) => 1 - Math.pow(1 - Math.max(0, Math.min(1, x)), 1.7);
+
   function draw() {
     if (!w || !h || !pts.length) return;
     g!.clearRect(0, 0, w, h);
@@ -164,14 +171,18 @@ export function createMethod(
       const tx = a[0] + (b[0] - a[0]) * k;
       const ty = a[1] + (b[1] - a[1]) * k;
       /* a little drift so it never looks frozen, damped as it resolves */
-      const dx = Math.sin(t * 0.9 + i * 0.7) * 1.5 * (1 - shown * 0.6);
-      const dy = Math.cos(t * 0.8 + i * 0.5) * 1.5 * (1 - shown * 0.6);
+      const dx = Math.sin(t * 0.9 + i * 0.7) * 2.1 * (1 - shown * 0.6);
+      const dy = Math.cos(t * 0.8 + i * 0.5) * 2.1 * (1 - shown * 0.6);
       p.x += (tx + dx - p.x) * 0.14;
       p.y += (ty + dy - p.y) * 0.14;
       const col = ramp(0.3 + shown * 0.62 + (i % 7) / 60);
-      g!.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.32 + shown * 0.5})`;
+      /*  F3b — the scatter was almost invisible at low progress, so the
+          first state of a four-state argument never registered. The
+          floor is raised and the growth reduced: SCATTER now reads the
+          moment the section arrives, and SYSTEM still resolves brighter. */
+      g!.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.62 + shown * 0.3})`;
       g!.beginPath();
-      g!.arc(p.x, p.y, 1.1 + shown * 1.15, 0, TAU);
+      g!.arc(p.x, p.y, 1.9 + shown * 0.9, 0, TAU);
       g!.fill();
     }
 
@@ -201,7 +212,7 @@ export function createMethod(
     raf = requestAnimationFrame(loop);
     if (!visible) return;
     t += 0.012;
-    shown += (target - shown) * 0.09;
+    shown += (lead(target) - shown) * 0.12;
     draw();
     const idx = Math.min(3, Math.round(shown * 3));
     onReadout(NAMES[idx], `${String(Math.round(shown * 100)).padStart(2, "0")}%`);

@@ -108,12 +108,17 @@ export function Reveal({ scope = "main" }: { scope?: string }) {
       io.observe(el);
     });
 
-    /*  A safety net on the same scroll store every other instrument
-        reads. IntersectionObserver is the primary and wins in practice
-        — this pass finds nothing to do. But an observer that never
-        delivers leaves the whole page stranded at opacity 0, and no
-        reveal is worth that risk: content must never be permanently
-        invisible because one browser API went quiet. */
+    /*  F2 — anything already on screen reveals on mount.
+
+        Waiting on an IntersectionObserver for an element that is
+        ALREADY in view costs a full observer delivery before the h1 so
+        much as starts, which read as the heading taking seconds to
+        appear. Above the fold is not a scroll event; it is the initial
+        state. Below the fold still waits for the observer.
+
+        This doubles as the safety net: an observer that never delivers
+        would otherwise strand the page at opacity 0, and no reveal is
+        worth that. */
     const sweep = () => {
       if (!pending.size) return;
       const h = window.innerHeight;
@@ -122,6 +127,8 @@ export function Reveal({ scope = "main" }: { scope?: string }) {
         if (r.top < h * 0.92 && r.bottom > 0) fire(el);
       }
     };
+
+    sweep();
     const stopSweep = onScroll(sweep);
     const settle = setTimeout(sweep, 400);
 

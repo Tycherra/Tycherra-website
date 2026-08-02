@@ -44,9 +44,22 @@ export function Method() {
       reduced,
     );
 
+    /*  F3a — progress is measured against the LAST STEP, not the whole
+        section. Measured against the section, SYSTEM only resolved once
+        the footer of the block had scrolled by, which is well after
+        "Hand over" has been read and gone. Now the run ends exactly as
+        the last step reaches the middle of the screen, so the argument
+        completes on the sentence that describes completion. */
+    const steps = section.querySelector<HTMLElement>(".mt__steps");
     const progress = () => {
       const r = section.getBoundingClientRect();
-      const span = r.height - window.innerHeight;
+      const last = steps?.lastElementChild as HTMLElement | null;
+      const mid = window.innerHeight * 0.5;
+      const start = r.top;
+      const end = last
+        ? last.getBoundingClientRect().top + last.offsetHeight * 0.5 - mid + start
+        : r.height - window.innerHeight + start;
+      const span = start - end;
       if (span <= 0) return r.top < 0 ? 1 : 0;
       return Math.max(0, Math.min(1, -r.top / span));
     };

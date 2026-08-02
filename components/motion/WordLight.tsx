@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { onScroll } from "@/lib/scroll";
 
 /*  ═══════════════════════════════════════════════════════════════════
@@ -9,20 +9,28 @@ import { onScroll } from "@/lib/scroll";
     Words sit at .12 and come to full as they cross 62% of the viewport
     height, and fall back on the way up.
 
-    Three things this gets right that the first build did not:
+    ── why nothing but this file may set a word's opacity ───────────
+    The previous version left the .12 resting state in the stylesheet
+    and ran in useEffect. That produced a three-stage flicker on the
+    gradient clause, on every load:
 
-      · the serif clause is measured and driven exactly like every
-        other word. The prototype pinned it to opacity 1 in CSS while
-        the driver set inline opacity on it anyway, so the last word of
-        the sentence arrived already lit, was pushed to .12 by the
-        first paint, and lit again a moment later. On the single most
-        important line of the page.
-      · geometry is read on the same frame the opacity is written, from
-        the Lenis position, so it can never act on a stale rect.
-      · it re-measures once the faces have swapped in. Bricolage is a
-        variable font arriving over the network; every word moves when
-        it lands.
+      1. the raw sentence paints at full opacity, because the <w>
+         wrappers do not exist until JavaScript has split it
+      2. the wrappers appear and the stylesheet drops them to .12 —
+         visibly, because that rule carries a .5s transition
+      3. the driver measures and raises whatever is already past the
+         line
+
+    So the split and the first measurement both happen in a LAYOUT
+    effect, before the browser paints, and the resting .12 is written
+    inline by the same code that writes every later value. No
+    stylesheet touches a word's opacity, and the transition is
+    suppressed on the corrective passes so nothing animates out of a
+    state the visitor was never meant to see.
     ═══════════════════════════════════════════════════════════════════ */
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export function WordLight({
   label,
@@ -35,7 +43,7 @@ export function WordLight({
 }) {
   const qRef = useRef<HTMLHeadingElement>(null);
 
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     const q = qRef.current;
     if (!q) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -54,6 +62,8 @@ export function WordLight({
             }
             const el = document.createElement("w");
             el.textContent = tk;
+            /* the resting state, written where every other value is */
+            el.style.opacity = "0.12";
             frag.appendChild(el);
           });
           (n as ChildNode).replaceWith(frag);
@@ -71,24 +81,32 @@ export function WordLight({
       return;
     }
 
-    const paint = () => {
+    /** `settle` = correct the state without animating into it */
+    const paint = (settle = false) => {
       const line = window.innerHeight * 0.62;
+      if (settle) for (const el of words) el.style.transition = "none";
       for (const el of words) {
         /* read and write in the same pass — no cached geometry */
         el.style.opacity = el.getBoundingClientRect().top < line ? "1" : "0.12";
       }
+      if (settle) {
+        void q.offsetHeight; // flush before handing the transition back
+        for (const el of words) el.style.transition = "";
+      }
     };
 
-    const stop = onScroll(paint);
-    paint();
+    /* before the browser's first paint — the point of the layout effect */
+    paint(true);
 
+    const stop = onScroll(() => paint());
     /* the faces land after first paint and move every word with them */
-    document.fonts.ready.then(paint);
-    window.addEventListener("resize", paint);
+    document.fonts.ready.then(() => paint(true));
+    const onResize = () => paint(true);
+    window.addEventListener("resize", onResize);
 
     return () => {
       stop();
-      window.removeEventListener("resize", paint);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 

@@ -21,7 +21,7 @@ const fields: readonly Field[] = [
     label: "Your name",
     type: "text",
     autoComplete: "name",
-    placeholder: "Jane Mehta",
+    placeholder: "",
     required: true,
   },
   {
@@ -30,7 +30,7 @@ const fields: readonly Field[] = [
     label: "Email",
     type: "email",
     autoComplete: "email",
-    placeholder: "jane@company.com",
+    placeholder: "",
     required: true,
   },
   {
@@ -40,7 +40,7 @@ const fields: readonly Field[] = [
     optional: true,
     type: "text",
     autoComplete: "organization",
-    placeholder: "Where you work",
+    placeholder: "",
     required: false,
   },
   {
@@ -48,9 +48,9 @@ const fields: readonly Field[] = [
     id: "f-what",
     label: "What are you building?",
     type: "textarea",
-    placeholder:
-      "What it's for, who uses it, and what you'd like it to do. " +
-      "A paragraph is plenty.",
+    /*  F5 — no invented names, no worked example. A short neutral
+        prompt, or nothing. The label already says what to write. */
+    placeholder: "A paragraph is plenty",
     required: true,
   },
   {
@@ -58,7 +58,7 @@ const fields: readonly Field[] = [
     id: "f-when",
     label: "When would you like it live?",
     type: "text",
-    placeholder: "A date, a quarter, or “no fixed deadline”",
+    placeholder: "A date, a quarter, or no fixed deadline",
     required: true,
   },
 ];

@@ -44,7 +44,12 @@ export default function ContactPage() {
         <span className="lb lb--h" data-decode>
           {contact.label}
         </span>
-        <h1 className="head__h">{contact.h1}</h1>
+        {/*  F4 — the same measure, weight, technique and spacing as
+             Work and About. It was on its own smaller scale with no
+             reveal at all, which made it read as a different set. */}
+        <h1 className="top__h" data-chars>
+          {contact.h1}
+        </h1>
         <p className="top__lead up">{contact.lead}</p>
       </header>
 
