@@ -1,0 +1,414 @@
+/*  ═══════════════════════════════════════════════════════════════════
+    TYCHERRA — NATIVE ELEMENT RESET
+    PART 0.4 / PART 7.1 — no browser default survives.
+
+    The white box around the contact form's <legend> was a default
+    fieldset border. That is the class of bug this file exists to make
+    impossible. Every native element that ships a UA style is swept
+    into the system here, not just the ones currently in use — the
+    next component must not be able to reintroduce the leak.
+    ═══════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0 solid transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  scrollbar-color: var(--hot) var(--void);
+}
+
+body {
+  background: var(--void);
+  color: var(--bone);
+  font-family: var(--disp);
+  font-weight: 400;
+  line-height: 1.45;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── flow ──────────────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+ul,
+ol,
+menu {
+  list-style: none;
+}
+
+/* Restore semantics for assistive tech when the marker is removed. */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+}
+
+blockquote,
+q {
+  quotes: none;
+}
+
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+  content: "";
+}
+
+address {
+  font-style: normal;
+}
+
+abbr[title] {
+  text-decoration: none;
+  border-bottom: 0;
+  cursor: help;
+}
+
+b,
+strong {
+  font-weight: inherit;
+}
+
+small {
+  font-size: inherit;
+}
+
+sub,
+sup {
+  font-size: 0.7em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--mono);
+  font-size: 1em;
+}
+
+hr {
+  height: 1px;
+  border: 0;
+  background: var(--hairline);
+  color: inherit;
+  overflow: visible;
+}
+
+/* ── links ─────────────────────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── media ─────────────────────────────────────────────────────── */
+img,
+picture,
+video,
+canvas,
+svg,
+iframe,
+embed,
+object {
+  display: block;
+  max-width: 100%;
+  border: 0;
+}
+
+img,
+video {
+  height: auto;
+}
+
+/*  Deliberately NOT `svg { fill: currentColor }`. A blanket fill rule
+    overrides every presentation fill="none" attribute — which turned
+    the bearing dial into a filled disc. Each glyph sets its own fill. */
+
+/* ── tables ────────────────────────────────────────────────────── */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  text-indent: 0;
+  border-color: inherit;
+}
+
+caption,
+th {
+  text-align: left;
+  font-weight: inherit;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORM CONTROLS — the whole point of this file
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* THE BUG. A fieldset's UA border is a 2px groove that no design
+   survives. It is killed here, once, for every fieldset the site will
+   ever contain. */
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+  display: block;
+  float: none;
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+  color: inherit;
+}
+
+input,
+textarea,
+select,
+button,
+optgroup {
+  font: inherit;
+  font-family: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: inherit;
+  text-transform: inherit;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled,
+[type="button"]:disabled,
+[type="submit"]:disabled {
+  cursor: not-allowed;
+}
+
+textarea {
+  resize: vertical;
+  overflow: auto;
+  vertical-align: top;
+  field-sizing: content;
+}
+
+::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+label {
+  display: block;
+}
+
+/* Autofill: Chrome paints a light-blue block over the surface and
+   overrides the text colour. Both are pushed back into the system. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--bone);
+  caret-color: var(--bone);
+  -webkit-box-shadow: 0 0 0 1000px var(--void) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Vendor decorations that survive `appearance: none`. */
+select::-ms-expand {
+  display: none;
+}
+
+::-webkit-search-decoration,
+::-webkit-search-cancel-button,
+::-webkit-search-results-button,
+::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+::-webkit-file-upload-button,
+::file-selector-button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+::-webkit-textfield-decoration-container {
+  background: none;
+}
+
+/* Firefox draws a dotted inner ring on focused buttons. */
+::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+:-moz-focusring {
+  outline: none;
+}
+
+/* Firefox's native invalid-field glow. */
+:-moz-ui-invalid,
+:user-invalid {
+  box-shadow: none;
+}
+
+progress,
+meter {
+  vertical-align: baseline;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: var(--hair);
+}
+
+progress::-webkit-progress-bar {
+  background: var(--hair);
+}
+
+progress::-webkit-progress-value,
+progress::-moz-progress-bar {
+  background: var(--hot2);
+}
+
+/* ── disclosure and dialog ─────────────────────────────────────── */
+details summary {
+  display: block;
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker,
+summary::marker {
+  display: none;
+  content: "";
+}
+
+dialog {
+  padding: 0;
+  border: 0;
+  max-width: 100%;
+  max-height: 100%;
+  color: inherit;
+  background: var(--void);
+}
+
+dialog::backdrop {
+  background: rgba(7, 7, 10, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+/* ── focus — always drawn from the heat ramp, never the UA ring ── */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--hot2);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* ── selection ─────────────────────────────────────────────────── */
+::selection {
+  background: var(--hot2);
+  color: var(--void);
+}
+
+::-moz-selection {
+  background: var(--hot2);
+  color: var(--void);
+}
+
+/* ── scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 238, 230, 0.14);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hot);
+}
+
+/* ── hidden ────────────────────────────────────────────────────── */
+[hidden] {
+  display: none !important;
+}

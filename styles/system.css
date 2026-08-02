@@ -1,0 +1,2306 @@
+/*  ═══════════════════════════════════════════════════════════════════
+    TYCHERRA — THE DESIGN SYSTEM
+    Ported from the four prototypes. Every measurement here came out of
+    one of them; where the specification corrects the prototype the
+    correction is noted inline.
+
+    Hairlines are never a flat border. They are the fading gradient in
+    --hairline, applied through .edge-t / .edge-b so that ::before and
+    ::after stay free for the heat draws.
+    ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══ 1 · PRIMITIVES ═══════════════════════════════════════════════ */
+
+/* Blooms are positioned past the gutter on purpose. `clip` contains
+   them without creating a scroll container, so the document never
+   reports horizontal overflow and the sticky Method visualisation on
+   /about still has the viewport as its scrollport. `overflow-x: hidden`
+   would do neither — set on body it propagates to the viewport and
+   stops clipping at all. */
+main {
+  overflow-x: clip;
+}
+
+.gutter {
+  padding-inline: var(--pad);
+}
+
+.section {
+  position: relative;
+  z-index: 2;
+  padding: var(--sec) var(--pad);
+}
+
+/* Work and About carry more air than the prototypes — PART 4.2 / 4.3 */
+.section--air {
+  padding: var(--sec-air) var(--pad);
+}
+
+.edge-t {
+  background-image: var(--hairline);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 0;
+}
+
+.edge-b {
+  background-image: var(--hairline);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 100%;
+}
+
+.edge-tb {
+  background-image: var(--hairline), var(--hairline);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 1px, 100% 1px;
+  background-position: 0 0, 0 100%;
+}
+
+.rule {
+  display: block;
+  width: 100%;
+  height: 1px;
+  border: 0;
+  background: var(--hairline);
+}
+
+/* Skip link — PART 7.7 */
+.skip {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 999;
+  transform: translateY(-200%);
+  padding: 11px 18px;
+  background: var(--raise);
+  color: var(--bone);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: transform 0.3s var(--e);
+}
+
+.skip:focus-visible {
+  transform: none;
+}
+
+/* Ambient bloom. Colour is light — a soft radial, never a filled
+   rectangle. Intensity per PART 2.3. */
+.bloom {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(var(--glow-blur));
+  opacity: var(--glow-alpha);
+  background: radial-gradient(circle, var(--bloom-tint) 0%, transparent 68%);
+}
+
+/* ═══ 2 · TYPE ═════════════════════════════════════════════════════ */
+
+/* Geist Mono — labels, readouts, numbers, tags, nav. PART 2.4 */
+.lb {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.lb--on {
+  color: var(--bone);
+}
+
+.lb--h {
+  color: var(--hot2);
+  transition: color 0.7s linear;
+}
+
+.lb--lg {
+  font-size: 10px;
+}
+
+/* Bricolage Grotesque 800 — headings, statements, project titles */
+.hd {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  line-height: 0.86;
+}
+
+/* Instrument Serif italic — one emotional line per section, max.
+   Always gradient-filled. It has no weight axis, so anything that
+   must vary on it varies its gradient position instead. PART 7.6 */
+.ser {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.022em;
+  background: linear-gradient(96deg, var(--hot) 5%, var(--hot2) 55%, var(--r4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.9s linear;
+}
+
+.ser--bone {
+  background-image: linear-gradient(96deg, var(--bone) 18%, var(--r4));
+}
+
+.lead {
+  font-size: var(--lead);
+  line-height: 1.55;
+  max-width: 48ch;
+  color: var(--body);
+}
+
+.body {
+  font-size: var(--copy);
+  line-height: 1.58;
+  color: var(--body-quiet);
+}
+
+/* ═══ 3 · LINKS ════════════════════════════════════════════════════ */
+
+/* The underline-draw: absent, then drawn on approach. */
+.ul {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 2px;
+  transition: color 0.4s var(--e);
+}
+
+.ul::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hot), var(--hot2));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.55s var(--e);
+}
+
+.ul:hover,
+.ul:focus-visible {
+  color: var(--bone);
+}
+
+.ul:hover::after,
+.ul:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* The standing rule that retracts — reserved for the large mono
+   address links that close a page. */
+.mail {
+  font-family: var(--mono);
+  font-size: clamp(13px, 2.2vw, 20px);
+  font-weight: 500;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 4px;
+  transition: color 0.4s;
+}
+
+.mail::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--hot2), var(--r4));
+  transform-origin: left;
+  transition: transform 0.55s var(--e);
+}
+
+.mail:hover,
+.mail:focus-visible {
+  color: var(--r4);
+}
+
+.mail:hover::after,
+.mail:focus-visible::after {
+  transform: scaleX(0);
+  transform-origin: right;
+}
+
+.mail--sm {
+  font-size: clamp(12.5px, 1.5vw, 15px);
+}
+
+/* ═══ 4 · NAV ══════════════════════════════════════════════════════ */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 18px var(--pad);
+}
+
+/* the wordmark */
+.mk {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-bottom: 2px;
+  flex: none;
+}
+
+.mk__t {
+  display: flex;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.mk__t b {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: 0.46em;
+  text-transform: uppercase;
+  background: linear-gradient(96deg, var(--bone) 46%, var(--hot2) 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.8s linear;
+}
+
+/* the ° is a bearing dial; its tick sweeps on a 6s loop */
+.mk__d {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  margin-top: 1px;
+  flex: none;
+}
+
+.mk__d::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.4px solid var(--hot2);
+  transition: border-color 0.8s linear;
+}
+
+.mk__d::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 1.4px;
+  height: 4px;
+  background: var(--hot2);
+  transform-origin: 50% 6px;
+  animation: sweepd 6s linear infinite;
+  transition: background 0.8s linear;
+}
+
+@keyframes sweepd {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the full ramp beneath the mark, at a third, extending on hover */
+.mk__r {
+  height: 1px;
+  width: 100%;
+  background: var(--ramp-line);
+  transform: scaleX(0.34);
+  transform-origin: left;
+  transition: transform 0.8s var(--e);
+  opacity: 0.9;
+}
+
+.mk:hover .mk__r,
+.mk:focus-visible .mk__r {
+  transform: scaleX(1);
+}
+
+.nav__set {
+  position: relative;
+  display: flex;
+  gap: clamp(14px, 2vw, 30px);
+  align-items: center;
+  margin-left: auto;
+  margin-right: clamp(14px, 2vw, 28px);
+}
+
+.nv {
+  position: relative;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 6px 0;
+  white-space: nowrap;
+  transition: color 0.45s var(--e);
+}
+
+.nv:hover,
+.nv:focus-visible,
+.nv[aria-current="page"] {
+  color: var(--bone);
+}
+
+/* the needle — one hairline indicator, parked under the current route.
+   Stage 2 gives it hover, focus and route tracking. */
+.nv__needle {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 0;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--hot2) 22%,
+    var(--r4) 78%,
+    transparent
+  );
+  transition:
+    transform 0.55s var(--e),
+    width 0.55s var(--e),
+    opacity 0.35s var(--e),
+    background 0.8s linear;
+  pointer-events: none;
+}
+
+.nv__needle.is-on {
+  opacity: 1;
+}
+
+/* PART 3.1 — the Let's talk control. Hidden on /contact. */
+.talk {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone);
+  border: 1px solid var(--edge);
+  border-radius: 99px;
+  padding: 9px 17px;
+  transition:
+    border-color 0.5s var(--e),
+    background 0.5s var(--e),
+    color 0.4s var(--e);
+}
+
+.talk span:last-child {
+  transition: transform 0.45s var(--e);
+}
+
+.talk:hover,
+.talk:focus-visible {
+  background: var(--hot2);
+  border-color: var(--hot2);
+  color: var(--void);
+}
+
+.talk:hover span:last-child {
+  transform: translateX(3px);
+}
+
+.nav__clock {
+  flex: none;
+}
+
+@media (max-width: 1080px) {
+  .nav__clock {
+    display: none;
+  }
+}
+
+/* Stage 1 carries a plain wrapped link row under 860px, so the site is
+   fully navigable on a phone before the sheet exists. Stage 2 replaces
+   all of this with the burger and the clip-path sheet. */
+@media (max-width: 860px) {
+  .nav {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding-block: 14px;
+  }
+
+  .nav__set {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    flex-wrap: wrap;
+    gap: 8px clamp(14px, 4vw, 24px);
+    justify-content: flex-start;
+  }
+
+  .talk {
+    margin-left: auto;
+    padding: 8px 15px;
+  }
+}
+
+/* Below 640px the pill gives up its space — the sheet's own footer
+   owns the direct routes from stage 2, and Contact us is already in
+   the row. This is what keeps 320px from overflowing. */
+@media (max-width: 640px) {
+  .talk {
+    display: none;
+  }
+}
+
+/* ═══ 5 · PAGE HEAD ════════════════════════════════════════════════ */
+
+.top {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 var(--pad) clamp(30px, 6vh, 66px);
+  overflow: hidden;
+}
+
+/* Work and About get ~30% more header padding — PART 4.2 */
+.top--air {
+  padding-bottom: clamp(40px, 8vh, 86px);
+}
+
+/* The plate is drawn 1:1 and anchored to the top right, so the hero
+   crops it exactly the way the live canvas would size itself. It is
+   never scaled, which is what keeps a segment the same length on a
+   phone and on a 4K panel. */
+.top__field {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 0;
+  max-width: none;
+  pointer-events: none;
+  transform-origin: top right;
+}
+
+/* The live engine picks a 31–37px grid below 1100px rather than 43px,
+   so the field stays a texture on a phone instead of becoming a
+   handful of long strokes. The plate reaches the same place by scaling
+   the whole drawing — one plate, no second payload — and comes down in
+   intensity with it, because a small screen sits much closer to the
+   convergence point than a desktop one does. */
+@media (max-width: 860px) {
+  .top__field {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 640px) {
+  .top__field {
+    transform: scale(0.66);
+    opacity: 0.72;
+  }
+}
+
+.top__v {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 108% 84% at 50% 40%,
+    transparent 0%,
+    rgba(7, 7, 10, 0.44) 54%,
+    var(--void) 95%
+  );
+}
+
+.top__in {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+}
+
+.hud {
+  position: absolute;
+  z-index: 2;
+  top: 96px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--dim);
+  pointer-events: none;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.hud--l {
+  left: var(--pad);
+}
+
+.hud--r {
+  right: var(--pad);
+}
+
+.hud b {
+  font-weight: 400;
+  color: var(--hot2);
+  transition: color 0.7s linear;
+}
+
+@media (max-width: 700px) {
+  .hud--r {
+    display: none;
+  }
+}
+
+/* the shared h1 measure — Work, About, 404 */
+.top__h {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: var(--h1);
+  line-height: 0.78;
+  letter-spacing: -0.058em;
+  margin: 10px 0 0;
+  background: linear-gradient(172deg, var(--bone) 22%, var(--hot2) 98%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.9s linear;
+}
+
+.top__lead {
+  font-size: var(--lead);
+  line-height: 1.55;
+  max-width: 48ch;
+  color: var(--body);
+  margin-top: clamp(18px, 3.4vh, 34px);
+}
+
+.top__m {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 24px;
+  align-items: center;
+  margin-top: clamp(20px, 4vh, 42px);
+  padding-top: 16px;
+}
+
+.top__m b {
+  font-weight: 400;
+  color: var(--bone);
+}
+
+.cue {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.cue i {
+  display: block;
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(180deg, var(--hot2), transparent);
+  animation: drop 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes drop {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+/* ═══ 6 · HOME ═════════════════════════════════════════════════════ */
+
+.hero {
+  min-height: 100svh;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 var(--pad) clamp(28px, 6vh, 62px);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Home's h1 is a two-line composition, so it takes the paired measure
+   rather than --h1. At 15.5vw a fifteen-character line overruns the
+   viewport at every width above 320px. See NOTES. */
+.h1 {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.045em;
+  line-height: 0.88;
+  font-size: var(--h1-pair);
+  margin: 15px 0 0;
+}
+
+.h1 .h1__ser {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: -0.022em;
+  line-height: 0.9;
+  font-size: var(--h1-pair-serif);
+  margin-top: 0.03em;
+  background: linear-gradient(
+    97deg,
+    #4a0a20 0%,
+    #a81030 20%,
+    #ff2d4e 48%,
+    #ff7a1a 74%,
+    #ffb627 96%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sweep 12s ease-in-out infinite;
+}
+
+@keyframes sweep {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.hero__b {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 40px;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: clamp(24px, 5vh, 52px);
+  padding-top: 16px;
+}
+
+.hero__s {
+  font-size: var(--lead);
+  line-height: 1.55;
+  max-width: 48ch;
+  color: var(--body);
+}
+
+/* the ticker */
+.tk {
+  position: relative;
+  z-index: 3;
+  padding: 15px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--raise);
+  background-image: var(--hairline), var(--hairline);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 1px, 100% 1px;
+  background-position: 0 0, 0 100%;
+}
+
+.tk__r {
+  display: inline-flex;
+}
+
+.tk__r > span {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(
+    90deg,
+    #a81030,
+    #ff2d4e 38%,
+    #ff7a1a 68%,
+    #ffb627
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tk__r em {
+  font-style: normal;
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+/* the statement */
+.st__q {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.048em;
+  line-height: 0.92;
+  font-size: clamp(26px, 5.3vw, 80px);
+  max-width: 19ch;
+  margin-top: 20px;
+}
+
+.st__q em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.022em;
+  background: linear-gradient(96deg, var(--hot) 6%, var(--hot2) 58%, var(--r4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.9s linear;
+}
+
+.st__lead {
+  font-size: clamp(19px, 2.6vw, 34px);
+  line-height: 1.34;
+  letter-spacing: -0.018em;
+  max-width: 30ch;
+  margin-top: 22px;
+  color: var(--bone);
+}
+
+.st__g {
+  display: grid;
+  gap: 26px;
+  margin-top: clamp(46px, 8vh, 96px);
+  grid-template-columns: 1fr;
+}
+
+.st__c {
+  position: relative;
+  padding-top: 14px;
+}
+
+.st__c p {
+  font-size: var(--copy);
+  line-height: 1.58;
+  color: var(--body-quiet);
+  margin-top: 8px;
+  max-width: 33ch;
+}
+
+@media (min-width: 800px) {
+  .st__lead {
+  font-size: clamp(19px, 2.6vw, 34px);
+  line-height: 1.34;
+  letter-spacing: -0.018em;
+  max-width: 30ch;
+  margin-top: 22px;
+  color: var(--bone);
+}
+
+.st__g {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+}
+
+/* the home work index — the four entries, condensed, linking through */
+.ji {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px 18px;
+  align-items: baseline;
+  padding: 26px 0;
+  position: relative;
+  transition: padding-left 0.55s var(--e);
+}
+
+.ji::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, var(--g2), transparent);
+  transition: width 0.9s var(--e);
+}
+
+.ji:hover::before,
+.ji:focus-visible::before {
+  width: 100%;
+}
+
+.ji:hover,
+.ji:focus-visible {
+  padding-left: 16px;
+}
+
+.ji__x {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ji__t {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(25px, 5.6vw, 76px);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  background-image: linear-gradient(94deg, var(--bone), var(--bone));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.55s;
+}
+
+.ji:hover .ji__t,
+.ji:focus-visible .ji__t {
+  background-image: linear-gradient(94deg, var(--g1), var(--g2));
+}
+
+.ji__d {
+  font-size: var(--copy);
+  line-height: 1.55;
+  color: var(--body-quiet);
+  max-width: 44ch;
+}
+
+@media (min-width: 920px) {
+  .ji {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.72fr);
+    gap: 40px;
+    align-items: center;
+    padding: 32px 0;
+  }
+}
+
+/* capability rows */
+.cp__h {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(32px, 7.8vw, 120px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  margin-top: 13px;
+  background: linear-gradient(96deg, var(--bone) 18%, var(--r4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cp__l {
+  margin-top: clamp(40px, 7vh, 82px);
+}
+
+.cp__r {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 21px 0;
+  position: relative;
+  transition: padding-left 0.55s var(--e);
+}
+
+.cp__r::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, var(--hot2), var(--r4));
+  transition: width 0.7s var(--e);
+}
+
+.cp__r:hover {
+  padding-left: 18px;
+}
+
+.cp__r:hover::before {
+  width: 100%;
+}
+
+.cp__r h3 {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(18px, 3vw, 36px);
+  letter-spacing: -0.035em;
+  line-height: 1;
+  transition: color 0.45s;
+}
+
+.cp__r:hover h3 {
+  color: var(--r4);
+}
+
+.cp__r p {
+  font-size: var(--copy);
+  line-height: 1.55;
+  color: var(--body-quiet);
+  max-width: 29ch;
+}
+
+@media (min-width: 700px) {
+  .cp__r p {
+    text-align: right;
+  }
+}
+
+/* ═══ 7 · CLOSE — shared by Home, Work, About ══════════════════════ */
+
+.end {
+  position: relative;
+  z-index: 2;
+  padding: var(--sec-air) var(--pad) clamp(40px, 7vh, 80px);
+}
+
+.end__h {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(40px, 10.4vw, 162px);
+  line-height: 0.84;
+  letter-spacing: -0.05em;
+  margin-top: 14px;
+}
+
+.end__h em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.022em;
+  background: linear-gradient(96deg, var(--hot) 4%, var(--hot2) 52%, var(--r4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.9s linear;
+}
+
+.end__r {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px 32px;
+  align-items: center;
+  margin-top: clamp(30px, 6vh, 60px);
+  padding-top: 19px;
+}
+
+/* ═══ 8 · WORK — the plates ════════════════════════════════════════ */
+
+.rail {
+  position: relative;
+  z-index: 2;
+}
+
+/* The project index. PART 7.3 — it must clear content at every
+   breakpoint, so the rail's left padding is held above its extent.
+
+   It is sticky inside the rail rather than fixed to the viewport, so
+   it is present for exactly as long as there are projects beside it
+   and never rides over the header or the close. A zero-height sticky
+   block carries it, which keeps it out of the rail's flow entirely. */
+.idx {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.8s var(--e);
+  position: sticky;
+  top: 50vh;
+  height: 0;
+  z-index: 36;
+}
+
+.idx__in {
+  position: absolute;
+  left: 56px;
+  top: 0;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.idx.lit {
+  opacity: 1;
+}
+
+@media (min-width: 1200px) {
+  .idx {
+    display: block;
+  }
+}
+
+.idx a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 0;
+  position: relative;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition:
+    color 0.5s var(--e),
+    padding-left 0.55s var(--e);
+}
+
+.idx a i {
+  display: block;
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+  transition:
+    width 0.55s var(--e),
+    background 0.5s var(--e);
+}
+
+.idx a:hover,
+.idx a:focus-visible,
+.idx a.on {
+  color: var(--bone);
+  padding-left: 8px;
+}
+
+.idx a:hover i,
+.idx a:focus-visible i,
+.idx a.on i {
+  width: 26px;
+  background: var(--hot2);
+  opacity: 1;
+}
+
+.wp {
+  position: relative;
+  padding: var(--sec-air) var(--pad);
+  isolation: isolate;
+}
+
+/* the section bloom sits behind the composition at .12 — PART 2.3 */
+.wp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: var(--bloom-alpha);
+  background: radial-gradient(
+    ellipse 56% 86% at 20% 44%,
+    var(--g1),
+    transparent 72%
+  );
+}
+
+@media (min-width: 1200px) {
+  .wp {
+    padding-left: max(var(--pad), 244px);
+  }
+}
+
+.wp__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(28px, 4.5vh, 48px);
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .wp__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+    gap: clamp(38px, 5vw, 88px);
+    align-items: center;
+  }
+
+  .wp--flip .wp__side {
+    order: -1;
+  }
+}
+
+.wp__lead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 12px;
+}
+
+.wp__lead i {
+  display: block;
+  width: 15px;
+  height: 1px;
+  background: var(--edge);
+  font-style: normal;
+}
+
+.wp__n {
+  color: var(--g2);
+  transition: color 0.5s;
+}
+
+.wp__t {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(38px, 6.6vw, 96px);
+  line-height: 0.86;
+  letter-spacing: -0.052em;
+  transition: transform 0.8s var(--e);
+  background-image: linear-gradient(94deg, var(--bone), var(--bone));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wp:hover .wp__t {
+  transform: translateX(12px);
+  background-image: linear-gradient(94deg, var(--g1), var(--g2));
+}
+
+.wp__cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  margin-top: clamp(24px, 3.6vh, 42px);
+}
+
+@media (min-width: 640px) and (max-width: 999px) {
+  .wp__cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 34px;
+  }
+}
+
+.wp__c {
+  position: relative;
+  padding-top: 14px;
+}
+
+.wp__c::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, var(--g2), transparent);
+  transition: width 1.1s var(--e) 0.25s;
+}
+
+.wp.on .wp__c::before {
+  width: 100%;
+}
+
+.wp__c p {
+  font-size: var(--copy);
+  line-height: 1.58;
+  margin-top: 9px;
+  max-width: 46ch;
+  color: var(--body);
+}
+
+.wp__c--a p {
+  color: var(--bone);
+}
+
+.wp__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  margin-top: clamp(24px, 3.6vh, 44px);
+  padding-top: 16px;
+}
+
+.wp__k {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wp__k span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border: 1px solid var(--edge);
+  border-radius: 99px;
+  padding: 6px 11px;
+  transition:
+    border-color 0.5s,
+    color 0.5s;
+}
+
+.wp:hover .wp__k span {
+  border-color: var(--g2);
+  color: var(--bone);
+}
+
+.wp__go {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  position: relative;
+  padding-bottom: 3px;
+  transition: color 0.45s;
+}
+
+.wp__go::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--g1), var(--g2));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.55s var(--e);
+}
+
+.wp__go:hover,
+.wp__go:focus-visible,
+.wp:hover .wp__go {
+  color: var(--bone);
+}
+
+.wp__go:hover::after,
+.wp__go:focus-visible::after,
+.wp:hover .wp__go::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ── the plate ─────────────────────────────────────────────────────
+   Screenshots arrive from three different colour worlds. Left alone
+   they read as pasted in, so each is reduced to luminance and
+   re-tinted through this page's own heat gradient — the image is
+   literally coloured by the site. Hover restores the truth.
+   ───────────────────────────────────────────────────────────────── */
+.pl {
+  position: relative;
+  max-width: 640px;
+  margin-left: auto;
+}
+
+@media (min-width: 1000px) {
+  .wp--flip .pl {
+    margin-left: 0;
+    margin-right: auto;
+  }
+}
+
+.pl__st {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--raise);
+}
+
+.pl__st img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  /* The prototype's brightness of .86 was tuned against darker source
+     material. Prakyat's page is cream, and at .86 the tinted plate
+     comes back as a pale pink rectangle — which is a colour filling a
+     rectangle, and PART 0.2 says that is wrong. Pulling the luminance
+     down first lands every plate in the dark room; hover still
+     restores the truth. */
+  filter: grayscale(1) contrast(1.14) brightness(0.66);
+  transform: scale(1.02);
+  /* wiped in from the top only after the frame has drawn */
+  clip-path: inset(0 0 100% 0);
+  transition:
+    clip-path 1.3s var(--e) 0.45s,
+    filter 1s var(--e),
+    transform 1.4s var(--e);
+}
+
+.wp.on .pl__st img {
+  clip-path: inset(0 0 0 0);
+}
+
+.wp:hover .pl__st img {
+  filter: grayscale(0) contrast(1.02) brightness(1);
+  transform: scale(1.045);
+}
+
+.pl__tone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: color;
+  opacity: var(--tone-alpha);
+  background: linear-gradient(148deg, var(--g1) 8%, var(--g2) 92%);
+  transition: opacity 0.9s var(--e);
+}
+
+.wp:hover .pl__tone {
+  opacity: 0;
+}
+
+.pl__lift {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  background: linear-gradient(148deg, var(--g1), transparent 62%);
+  transition: opacity 0.9s var(--e);
+}
+
+.wp:hover .pl__lift {
+  opacity: 0;
+}
+
+.pl__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.26;
+  background-image:
+    linear-gradient(var(--dim-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dim-line) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+/*  The drawn frame. Corner brackets and dimension leads are measured
+    against the plate's real box and plotted in by components/work/
+    WorkLive.tsx as the project arrives — geometry, not decoration. */
+.pl__f {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+}
+
+.pl__f path {
+  fill: none;
+  stroke: var(--g2);
+  stroke-width: 1.3;
+  transition: stroke 0.8s linear;
+}
+
+.pl__f path.dim {
+  stroke: var(--dim-line);
+  stroke-width: 1;
+}
+
+/* PART 8.2 — on hover the drawn corners extend by 4px alongside the
+   duotone release */
+.pl__f {
+  transition: inset 0.55s var(--e);
+}
+
+.wp:hover .pl__f {
+  inset: -4px;
+}
+
+/*  the caption strip beneath each plate — mono, hairline-separated */
+.pl__d {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.pl__d hr {
+  flex: 1;
+  border: 0;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.pl__d em {
+  font-style: normal;
+  color: var(--g2);
+  transition: color 0.5s;
+}
+
+/*  The entry with no public interface plots its flow instead. The
+    canvas has to be told to fill the plate — a bare <canvas> defaults
+    to 300×150 and, given only width:100%, keeps that 2:1 ratio while
+    the plate around it is 16:10. */
+.pl__st canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* the needle, parked beneath the current route. Stage 2 lifts this
+   into one sliding indicator that also tracks hover and focus. */
+.nv[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--hot2) 22%,
+    var(--r4) 78%,
+    transparent
+  );
+  transition: background 0.8s linear;
+}
+
+/* per-entry heat clearance — each plate takes its own pair of stops */
+.wp--1,
+.ji--1 {
+  --g1: #4a0a20;
+  --g2: #a81030;
+}
+
+.wp--2,
+.ji--2 {
+  --g1: #a81030;
+  --g2: #ff2d4e;
+}
+
+.wp--3,
+.ji--3 {
+  --g1: #ff2d4e;
+  --g2: #ff7a1a;
+}
+
+.wp--4,
+.ji--4 {
+  --g1: #ff7a1a;
+  --g2: #ffb627;
+}
+
+/* ═══ 9 · ABOUT ════════════════════════════════════════════════════ */
+
+.mt__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 18px;
+  padding: 20px var(--pad) 0;
+}
+
+.mt__wrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 0 var(--pad) clamp(50px, 10vh, 120px);
+}
+
+/* PART 7.3 — sticky elements need explicit scroll travel. The
+   prototype set `align-items: start`, which sizes the left column to
+   its own content: the visualisation then has nowhere to travel and
+   scrolls away while the steps keep going. The column has to stretch
+   to the full row so the sticky offset has the whole 210vh to work
+   against. */
+@media (min-width: 1000px) {
+  .mt__wrap {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: clamp(40px, 5vw, 96px);
+    align-items: stretch;
+  }
+}
+
+.mt__viz {
+  position: sticky;
+  top: 88px;
+  z-index: 1;
+  height: min(42vh, 300px);
+  margin: 22px 0 8px;
+}
+
+@media (min-width: 1000px) {
+  .mt__viz {
+    top: calc(50vh - 210px);
+    height: min(56vh, 420px);
+    margin: 40px 0 0;
+  }
+}
+
+.mt__read {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 9px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.mt__read b {
+  font-weight: 400;
+  color: var(--hot2);
+  transition: color 0.7s linear;
+}
+
+/* PART 7.3 — sticky needs explicit travel on desktop and none on
+   mobile, or the visualisation pins to nothing. */
+.mt__steps {
+  position: relative;
+  min-height: 210vh;
+}
+
+@media (max-width: 999px) {
+  .mt__steps {
+    min-height: 0;
+  }
+}
+
+.stp {
+  padding: clamp(44px, 11vh, 130px) 0;
+  position: relative;
+}
+
+.stp:first-child {
+  padding-top: clamp(20px, 5vh, 60px);
+}
+
+.stp__n {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 13px;
+}
+
+.stp__n i {
+  display: block;
+  width: 16px;
+  height: 1px;
+  background: var(--edge);
+  font-style: normal;
+}
+
+.stp__t {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(28px, 4.4vw, 58px);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  background: linear-gradient(96deg, var(--bone) 44%, var(--hot2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.9s linear;
+}
+
+.stp__p {
+  font-size: var(--copy);
+  line-height: 1.6;
+  margin-top: 14px;
+  max-width: 44ch;
+  color: var(--body);
+}
+
+.stp__r {
+  position: relative;
+  height: 1px;
+  margin-top: 26px;
+  background: var(--hairline);
+}
+
+/* six principles */
+.pr__h {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(32px, 7.4vw, 116px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  margin-top: 13px;
+  background: linear-gradient(96deg, var(--bone) 18%, var(--r4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pr__l {
+  margin-top: clamp(36px, 6vh, 76px);
+}
+
+.pr__i {
+  display: flex;
+  gap: 18px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 20px 0;
+  position: relative;
+  transition: padding-left 0.55s var(--e);
+}
+
+.pr__i::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, var(--hot2), var(--r4));
+  transition: width 0.7s var(--e);
+}
+
+.pr__i:hover {
+  padding-left: 18px;
+}
+
+.pr__i:hover::before {
+  width: 100%;
+}
+
+.pr__i p {
+  font-family: var(--disp);
+  font-weight: 600;
+  font-size: clamp(16px, 2.3vw, 28px);
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  max-width: 30ch;
+  transition: color 0.45s;
+}
+
+.pr__i:hover p {
+  color: var(--r4);
+}
+
+.pr__i span {
+  flex: none;
+}
+
+/* three-up cards — refusals on About, next steps on Contact */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 26px;
+  margin-top: 26px;
+}
+
+@media (min-width: 820px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(30px, 4vw, 64px);
+  }
+}
+
+.card {
+  position: relative;
+  padding-top: 15px;
+}
+
+.card h3 {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(17px, 2.2vw, 26px);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin-top: 9px;
+}
+
+.card p {
+  font-size: var(--copy);
+  line-height: 1.58;
+  margin-top: 9px;
+  color: var(--body-quiet);
+  max-width: 36ch;
+}
+
+/* ═══ 10 · CONTACT ═════════════════════════════════════════════════ */
+
+.head {
+  position: relative;
+  z-index: 2;
+  padding: clamp(140px, 22vh, 210px) var(--pad) clamp(34px, 6vh, 60px);
+}
+
+/* Contact's h1 is smaller by design — it has no hero. PART 2.4 */
+.head__h {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: var(--h1-contact);
+  line-height: 0.86;
+  letter-spacing: -0.052em;
+  margin-top: 12px;
+  background: linear-gradient(172deg, var(--bone) 22%, var(--hot2) 98%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-image 0.9s linear;
+}
+
+.panel {
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--pad) clamp(60px, 11vh, 130px);
+}
+
+.panel__in {
+  position: relative;
+  padding-top: clamp(26px, 4.6vh, 50px);
+}
+
+.panel__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: clamp(22px, 4vh, 44px);
+}
+
+.panel__bar b {
+  font-weight: 400;
+  color: var(--hot2);
+  transition: color 0.7s linear;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(30px, 4.5vw, 80px);
+}
+
+@media (min-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+    align-items: start;
+  }
+}
+
+.f__set {
+  margin-bottom: clamp(26px, 4vh, 44px);
+}
+
+.f__legend {
+  display: block;
+  margin-bottom: 13px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border: 1px solid var(--edge);
+  border-radius: 99px;
+  padding: 9px 15px;
+  cursor: pointer;
+  transition:
+    border-color 0.45s var(--e),
+    color 0.45s var(--e),
+    background 0.45s var(--e),
+    transform 0.18s var(--e);
+}
+
+.chip:hover {
+  color: var(--bone);
+  border-color: var(--bone);
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.chip[aria-pressed="true"] {
+  color: var(--void);
+  border-color: var(--hot2);
+  background: var(--hot2);
+}
+
+/* a status light per row, warming when the row holds something valid */
+.row {
+  position: relative;
+  padding: 15px 0 13px 26px;
+  background-image: var(--hairline);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 100%;
+}
+
+.row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--edge);
+  background: transparent;
+  transition:
+    background 0.5s var(--e),
+    border-color 0.5s var(--e),
+    box-shadow 0.5s var(--e);
+}
+
+.row.filled::before {
+  background: var(--hot2);
+  border-color: var(--hot2);
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--hot2) 50%, transparent);
+}
+
+.row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, var(--hot), var(--hot2));
+  transition: width 0.6s var(--e);
+}
+
+.row:focus-within::after {
+  width: 100%;
+}
+
+.row label {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.row input,
+.row textarea {
+  width: 100%;
+  display: block;
+  outline: none;
+  font-size: clamp(14.5px, 1.5vw, 17px);
+  line-height: 1.5;
+  color: var(--bone);
+  font-family: var(--disp);
+  font-weight: 400;
+}
+
+.row textarea {
+  resize: vertical;
+  min-height: 104px;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 620px) {
+  .pair {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 clamp(20px, 3vw, 44px);
+  }
+}
+
+.send {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: center;
+  margin-top: clamp(26px, 4vh, 46px);
+}
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone);
+  border: 1px solid var(--edge);
+  border-radius: 99px;
+  padding: 14px 24px;
+  transition:
+    border-color 0.5s var(--e),
+    color 0.4s,
+    background 0.5s var(--e);
+}
+
+.btn i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--edge);
+  transition:
+    background 0.5s var(--e),
+    box-shadow 0.5s var(--e);
+}
+
+.btn.ready {
+  border-color: var(--hot2);
+}
+
+.btn.ready i {
+  background: var(--hot2);
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--hot2) 55%, transparent);
+}
+
+.btn.ready:hover {
+  background: var(--hot2);
+  color: var(--void);
+}
+
+.btn.ready:hover i {
+  background: var(--void);
+  box-shadow: none;
+}
+
+.btn[disabled] {
+  cursor: not-allowed;
+  color: var(--dim);
+}
+
+/* the aside */
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 3.4vh, 36px);
+}
+
+.side__b {
+  padding-top: 14px;
+}
+
+.side__b p {
+  font-size: var(--copy);
+  line-height: 1.55;
+  color: var(--body-quiet);
+  margin-top: 8px;
+  max-width: 34ch;
+}
+
+.side__row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 9px;
+}
+
+.side__k {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  background-image: var(--hairline);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 0 100%;
+}
+
+.side__k:last-child {
+  background-image: none;
+}
+
+.side__k b {
+  font-weight: 400;
+  color: var(--bone);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ═══ 11 · FOOTER ══════════════════════════════════════════════════ */
+
+.ft {
+  position: relative;
+  z-index: 2;
+  padding: clamp(54px, 9vh, 96px) var(--pad) 24px;
+}
+
+.ft__g {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(34px, 5vh, 54px) clamp(28px, 4vw, 70px);
+}
+
+@media (min-width: 760px) {
+  .ft__g {
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .ft__g {
+    grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+  }
+}
+
+.ft__p {
+  font-size: var(--copy);
+  line-height: 1.55;
+  color: var(--body-quiet);
+  margin-top: 16px;
+  max-width: 30ch;
+}
+
+.ft__col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ft__col a,
+.ft__col span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.ft__col a {
+  align-self: flex-start;
+}
+
+.ft__ic {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ft__ic svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  opacity: 0.8;
+}
+
+.ft__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: clamp(40px, 7vh, 78px);
+  padding-top: 20px;
+}
+
+.ft__av {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* PART 3.2 / 8.2 — the availability dot, a slow 3s pulse */
+.ft__dot {
+  position: relative;
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hot2);
+  flex: none;
+}
+
+.ft__dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--hot2);
+  animation: avail 3s var(--e) infinite;
+}
+
+@keyframes avail {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+.ft__base {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 18px;
+}
+
+/* ═══ 12 · 404 AND PRIVACY ═════════════════════════════════════════ */
+
+.nf {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(120px, 18vh, 200px) var(--pad) clamp(60px, 10vh, 120px);
+  overflow: hidden;
+}
+
+.nf__h {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(48px, 13vw, 210px);
+  line-height: 0.82;
+  letter-spacing: -0.055em;
+  margin-top: 12px;
+  background: linear-gradient(172deg, var(--bone) 26%, var(--hot2) 98%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.prose {
+  max-width: 68ch;
+}
+
+.prose h2 {
+  font-family: var(--disp);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(19px, 2.4vw, 28px);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin-top: clamp(40px, 6vh, 68px);
+}
+
+.prose p,
+.prose li {
+  font-size: var(--copy);
+  line-height: 1.66;
+  color: var(--body);
+  margin-top: 13px;
+}
+
+.prose ul {
+  margin-top: 6px;
+}
+
+.prose li {
+  position: relative;
+  padding-left: 20px;
+}
+
+.prose li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 9px;
+  height: 1px;
+  background: var(--hot2);
+}
+
+.prose a {
+  color: var(--bone);
+  border-bottom: 1px solid var(--hot2);
+  padding-bottom: 1px;
+  transition: color 0.4s;
+}
+
+.prose a:hover {
+  color: var(--hot2);
+}
+
+/* ═══ 13 · REDUCED MOTION ══════════════════════════════════════════
+   PART 7.7 — it gates everything. Nothing loops, nothing sweeps.
+   ═════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .mt__viz {
+    position: static;
+  }
+
+  .mt__steps {
+    min-height: 0;
+  }
+
+  /* Both of these end their keyframes invisible, so collapsing the
+     duration would delete them rather than still them. */
+  .cue i {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .ft__dot::after {
+    display: none;
+  }
+}

@@ -1,0 +1,17 @@
+/*  ═══════════════════════════════════════════════════════════════════
+    Layer order matters here. Tailwind v4 declares
+    `@layer theme, base, components, utilities`, and unlayered CSS beats
+    every layer — so importing the reset unlayered would let
+    `* { margin: 0 }` silently win over every margin utility on the
+    site. The reset goes into `base` and the design system into
+    `components`, which puts them below utilities exactly where they
+    belong. tokens.css stays unlayered: it only declares custom
+    properties and the `@theme` block Tailwind reads.
+    ═══════════════════════════════════════════════════════════════════ */
+
+@import "tailwindcss";
+
+@import "../styles/tokens.css";
+@import "../styles/reset.css" layer(base);
+@import "../styles/system.css" layer(components);
+@import "../styles/live.css" layer(components);
