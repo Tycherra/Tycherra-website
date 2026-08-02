@@ -6,6 +6,7 @@ import {
 } from "next/font/google";
 import { Nav } from "@/components/chrome/Nav";
 import { Footer } from "@/components/chrome/Footer";
+import { WhatsAppDock } from "@/components/chrome/WhatsAppDock";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -157,6 +158,7 @@ export default function RootLayout({
         <Nav />
         <main id="main">{children}</main>
         <Footer />
+        <WhatsAppDock />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

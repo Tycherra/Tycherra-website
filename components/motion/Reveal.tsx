@@ -56,6 +56,11 @@ export function Reveal({ scope = "main" }: { scope?: string }) {
       el.dataset.split = "1";
       const text = el.textContent ?? "";
       el.textContent = "";
+      /*  F2 — 38ms is the house stagger, but a long heading would push
+          the run past the 1.2s ceiling. The delay is capped so the last
+          character always starts within 240ms and the whole rise lands
+          under 1.2s, whatever the heading says. */
+      const step = Math.min(38, 240 / Math.max(1, text.length - 1));
       text.split("").forEach((c, i) => {
         if (c === " ") {
           el.appendChild(document.createTextNode(" "));
@@ -63,7 +68,7 @@ export function Reveal({ scope = "main" }: { scope?: string }) {
         }
         const span = document.createElement("span");
         span.className = "chr";
-        span.style.transitionDelay = `${i * 38}ms`;
+        span.style.transitionDelay = `${Math.round(i * step)}ms`;
         span.textContent = c;
         el.appendChild(span);
       });

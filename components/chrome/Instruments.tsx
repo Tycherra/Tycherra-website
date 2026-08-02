@@ -111,22 +111,64 @@ export function Instruments({ from, to, lead = 0.22, seed }: Props) {
         routes.push({ d, band: b });
       });
 
-      /* the routes resolve into a symmetric circuit at the footer */
-      const fy = H - 118;
+      const marginNodeCount = nodes.length;
+
+      /*  P2 — THE FOOTER CIRCUIT.
+
+          The old resolution was three right-angle traces and five pads,
+          and nobody noticed it. This is a real circuit: four parallel
+          buses entering from both margins at staggered depths, each
+          branching inward through its own right angle onto a shared
+          spine, every branch carrying a junction pad, and one central
+          terminal that completes last.
+
+          The pads light from the outside inward, so the assembly reads
+          as current arriving rather than as a drawing appearing. Every
+          band is scrubbed by scroll, so the whole thing runs backwards
+          when you scroll back up. */
+      const fy = H - 210;
       const cx = W / 2;
-      let f = `M0 ${fy}L${cx - 190} ${fy}L${cx - 190} ${fy + 34}L${cx - 96} ${fy + 34}L${cx - 96} ${fy + 66}`;
-      f += `M${W} ${fy}L${cx + 190} ${fy}L${cx + 190} ${fy + 34}L${cx + 96} ${fy + 34}L${cx + 96} ${fy + 66}`;
-      f += `M${cx - 96} ${fy + 66}L${cx + 96} ${fy + 66}M${cx} ${fy + 66}L${cx} ${fy + 92}`;
-      routes.push({ d: f, band: [0.92, 1] });
-      (
-        [
-          [cx - 190, fy + 34],
-          [cx + 190, fy + 34],
-          [cx - 96, fy + 66],
-          [cx + 96, fy + 66],
-          [cx, fy + 92],
-        ] as [number, number][]
-      ).forEach((n) => nodes.push(n));
+      const bus = [0, 1, 2, 3].map((i) => ({
+        y: fy + i * 26,
+        /* how far in each bus travels before it turns down */
+        x: Math.min(cx - 70, 150 + i * 92),
+        /* outermost bus lands first, innermost last */
+        band: [0.7 + i * 0.055, 0.82 + i * 0.055] as [number, number],
+      }));
+
+      const spineY = fy + 118;
+      const termY = spineY + 42;
+
+      for (const b of bus) {
+        /* in from both margins, turn, and drop onto the spine */
+        routes.push({
+          d:
+            `M0 ${b.y}L${b.x} ${b.y}L${b.x} ${spineY}` +
+            `M${W} ${b.y}L${W - b.x} ${b.y}L${W - b.x} ${spineY}`,
+          band: b.band,
+        });
+        nodes.push([b.x, b.y], [W - b.x, b.y]);
+        nodes.push([b.x, spineY], [W - b.x, spineY]);
+      }
+
+      /* the shared spine, closing inward from both ends at once */
+      const inner = bus[bus.length - 1].x;
+      routes.push({
+        d: `M${inner} ${spineY}L${cx} ${spineY}M${W - inner} ${spineY}L${cx} ${spineY}`,
+        band: [0.9, 0.965],
+      });
+
+      /* the terminal — last to complete, and it holds a slow pulse */
+      routes.push({
+        d:
+          `M${cx} ${spineY}L${cx} ${termY}` +
+          `M${cx - 24} ${termY}L${cx + 24} ${termY}` +
+          `M${cx - 24} ${termY}L${cx - 24} ${termY + 18}` +
+          `M${cx + 24} ${termY}L${cx + 24} ${termY + 18}` +
+          `M${cx - 24} ${termY + 18}L${cx + 24} ${termY + 18}`,
+        band: [0.96, 1],
+      });
+      nodes.push([cx, spineY]);
 
       svg.innerHTML =
         routes
@@ -136,9 +178,13 @@ export function Instruments({ from, to, lead = 0.22, seed }: Props) {
           )
           .join("") +
         nodes
-          .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.1" data-y="${y}"/>`)
+          .map(
+            ([x, y], i) =>
+              `<circle cx="${x}" cy="${y}" r="${i === nodes.length - 1 ? 3.4 : 2.4}" data-y="${y}" data-order="${i}"${i === nodes.length - 1 ? ' class="term"' : ""}/>`,
+          )
           .join("");
 
+      const circuitNodeCount = nodes.length - marginNodeCount;
       const paths = Array.from(svg.querySelectorAll("path"));
       const dots = Array.from(svg.querySelectorAll("circle"));
 
@@ -149,8 +195,18 @@ export function Instruments({ from, to, lead = 0.22, seed }: Props) {
           el.style.strokeDashoffset = String(1 - Math.max(0, Math.min(1, k)));
         });
         const yNow = p * (H - window.innerHeight) + window.innerHeight * 0.9;
+        /*  Margin nodes light as the scroll passes them. The circuit's
+            own pads light in sequence from the outside inward across the
+            last third, so the assembly reads as current arriving. */
+        const seq = Math.max(0, (p - 0.68) / 0.32);
         dots.forEach((c) => {
-          c.style.opacity = Number(c.dataset.y) < yNow ? "0.9" : "0";
+          const order = Number(c.dataset.order);
+          if (order < marginNodeCount) {
+            c.style.opacity = Number(c.dataset.y) < yNow ? "0.9" : "0";
+            return;
+          }
+          const k = (order - marginNodeCount) / Math.max(1, circuitNodeCount);
+          c.style.opacity = seq > k ? "1" : "0";
         });
       };
     }

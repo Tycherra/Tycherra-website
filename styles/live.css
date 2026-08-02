@@ -312,7 +312,34 @@
   opacity: 0;
   transition:
     fill 0.8s linear,
-    opacity 0.5s;
+    opacity 0.45s var(--e);
+}
+
+/*  P2 — the central terminal completes last and then holds a slow
+    pulse, so the very bottom of the page is still alive once the
+    circuit has assembled. */
+.maze circle.term {
+  animation: term 3.2s var(--e) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes term {
+  0%,
+  100% {
+    r: 3.4;
+    opacity: 1;
+  }
+  50% {
+    r: 4.6;
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maze circle.term {
+    animation: none;
+  }
 }
 
 /* PART 8.4 — the maze renders above 820px only */
@@ -465,6 +492,59 @@
 @media (max-width: 900px) {
   .dial {
     display: none;
+  }
+}
+
+/*  P1 — the WhatsApp control. Bottom left, opposite the dial, so the
+    two instruments hold the corners of the panel between them. It is
+    absent until the visitor has started reading. */
+.wa {
+  position: fixed;
+  left: 16px;
+  bottom: 20px;
+  z-index: 46;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--void);
+  border: 1px solid var(--edge);
+  color: var(--dim);
+  opacity: 0;
+  transform: translateY(10px) scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 0.6s var(--e),
+    transform 0.6s var(--e),
+    border-color 0.45s var(--e),
+    color 0.45s var(--e),
+    box-shadow 0.45s var(--e);
+}
+
+.wa.on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.wa svg {
+  width: 21px;
+  height: 21px;
+  display: block;
+}
+
+.wa:hover,
+.wa:focus-visible {
+  border-color: var(--hot2);
+  color: var(--hot2);
+  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--hot2) 60%, transparent);
+}
+
+/* the spine owns the left edge above 900px — step the control clear */
+@media (min-width: 901px) {
+  .wa {
+    left: 34px;
   }
 }
 
