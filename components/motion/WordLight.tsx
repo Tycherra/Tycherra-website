@@ -53,6 +53,17 @@ export function WordLight({
     if (q.dataset.split !== "1") {
       q.dataset.split = "1";
       const walk = (n: Node) => {
+        /*  Never split inside the gradient clause. `background-clip:
+            text` clips the <em>'s gradient to the text in its own inline
+            run — and an inline-block <w> child forms its own formatting
+            context, so its glyphs leave that run. The clip then has
+            nothing to paint against and the words, which inherit
+            `color: transparent`, vanish completely.
+
+            The clause is exempt from lighting anyway, so it keeps its
+            bare text node and renders exactly as it would if
+            word-lighting did not exist. */
+        if (n.nodeType === 1 && (n as Element).tagName === "EM") return;
         if (n.nodeType === 3) {
           const frag = document.createDocumentFragment();
           (n.textContent ?? "").split(/(\s+)/).forEach((tk) => {
@@ -72,16 +83,10 @@ export function WordLight({
       Array.from(q.childNodes).forEach(walk);
     }
 
-    /*  The gradient clause is the payoff of the sentence and it is
-        exempt: it loads lit and stays lit. Only the plain words are
-        driven, so the coloured words can never dim, flicker, or come
-        back — not even for a frame. They are set once, here, and the
-        driver never touches them again. */
-    const all = Array.from(q.querySelectorAll<HTMLElement>("w"));
-    for (const el of all) {
-      if (el.closest("em")) el.style.opacity = "1";
-    }
-    const words = all.filter((el) => !el.closest("em"));
+    /*  Only the plain words are driven. The gradient clause was never
+        wrapped, so it simply loads lit and stays lit — it cannot dim,
+        flicker, or come back, because nothing addresses it. */
+    const words = Array.from(q.querySelectorAll<HTMLElement>("w"));
     for (const el of words) el.style.opacity = "0.12";
 
     if (reduced) {

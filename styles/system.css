@@ -402,22 +402,28 @@ main {
 
 /*  THE MOBILE SHEET — PART 3.1.
     Under 860px the link row gives way to the burger and the sheet. */
+/*  44x44, which is the smallest target a thumb can hit reliably — the
+    control was 30px, well under it. The mark itself is unchanged: the
+    two rules stay 22px wide and 6px apart, they just sit inside a
+    bigger box, and the negative margin keeps the drawn edge on the
+    same optical line as the wordmark opposite it. */
 .burger {
   display: none;
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
+  margin: -7px -7px -7px auto;
   flex: none;
-  margin-left: auto;
   z-index: 61;
   background: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .burger i {
   position: absolute;
-  left: 4px;
-  right: 4px;
+  left: 11px;
+  right: 11px;
   height: 1.5px;
   background: var(--bone);
   transition:
@@ -426,11 +432,11 @@ main {
 }
 
 .burger i:nth-child(1) {
-  top: 12px;
+  top: 19px;
 }
 
 .burger i:nth-child(2) {
-  top: 18px;
+  top: 25px;
 }
 
 body.menu .burger i:nth-child(1) {
@@ -1650,7 +1656,7 @@ body.menu {
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  padding: 0 var(--pad) clamp(50px, 10vh, 120px);
+  padding: 0 var(--pad) clamp(36px, 6vh, 76px);
 }
 
 /* PART 7.3 — sticky elements need explicit scroll travel. The
@@ -1774,12 +1780,20 @@ body.menu {
 }
 
 /*  The sticky offset centres the plate on the middle of the viewport,
-    which is where the active step sits. */
+    which is where the active step sits.
+
+    The offset used to be `50vh - min(29vh, 220px)` — half the plate's
+    CAPPED height. But the plate is usually shorter than its cap: at
+    16/10 the column width decides the height and the cap never binds,
+    so the plate hung ~22px above true centre and stopped fractionally
+    above "Hand over" instead of on it. Method measures the rendered
+    height and publishes half of it as --mt-half; the literal below is
+    only the pre-measurement fallback for the first paint. */
 @media (min-width: 1000px) {
   .mt__viz {
     aspect-ratio: 16 / 10;
     max-height: min(58vh, 440px);
-    top: calc(50vh - min(29vh, 220px));
+    top: calc(50vh - var(--mt-half, min(29vh, 220px)));
     margin: 0;
   }
 }
@@ -1802,16 +1816,29 @@ body.menu {
   transition: color 0.7s linear;
 }
 
-/* PART 7.3 — sticky needs explicit travel on desktop and none on
-   mobile, or the visualisation pins to nothing. */
+/*  PART 7.3 — sticky needs travel, but it needs the RIGHT amount.
+
+    This was `min-height: 210vh`, which is where the dead space came
+    from. The plate stops travelling when the grid row ends, and a
+    forced 210vh row ended roughly a screen below the last step: the
+    clip hit its final frame on "Hand over" and then kept sliding down
+    past it through a column with nothing in it.
+
+    The four steps are already ~1.7 screens of real content, so the row
+    needs no padding out at all. What it needs is to end at exactly the
+    scroll position where the last step is centred — the same instant
+    the scrub finishes. That offset is half the plate height minus half
+    the last step's height, which is content- and viewport-dependent,
+    so Method measures it and publishes it as --mt-tail. It is usually
+    a small negative number, which is why this is a margin. */
 .mt__steps {
   position: relative;
-  min-height: 210vh;
+  margin-bottom: var(--mt-tail, 0px);
 }
 
 @media (max-width: 999px) {
   .mt__steps {
-    min-height: 0;
+    margin-bottom: 0;
   }
 }
 
@@ -2554,5 +2581,214 @@ body.menu {
 
   .ft__dot::after {
     display: none;
+  }
+}
+
+/* ═══ THE DIRECT ROUTE — under the send row on /contact ═══════════════
+   NB the block is .ask, not .wa: .wa is already the floating WhatsApp
+   dock in live.css, and reusing it here inherited that element's
+   hidden state — a fixed 46px circle at opacity 0 — so this whole
+   group rendered invisible.
+   Deliberately not a second primary button. The form is the considered
+   route and keeps the only filled control on the page; this is an
+   outlined companion that reads as an alternative rather than a rival,
+   and it warms on hover the way every other outlined control does. */
+.ask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: clamp(26px, 4vh, 40px);
+  padding-top: clamp(20px, 3vh, 28px);
+  position: relative;
+}
+
+.ask__rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--hot2) 0%,
+    var(--dim-line) 34%,
+    transparent 88%
+  );
+  opacity: 0.7;
+}
+
+/* the label takes its own line; the control and its note share the next */
+.ask__lb {
+  flex: 1 0 100%;
+}
+
+.ask__go {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  flex: none;
+  white-space: nowrap;
+  padding: 13px 20px;
+  min-height: 46px;
+  border: 1px solid var(--dim-line);
+  color: var(--bone);
+  font-size: 14.5px;
+  letter-spacing: 0.01em;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 0.5s var(--e),
+    color 0.5s var(--e);
+}
+
+/* the heat arrives from the left on hover, as it does on .btn */
+.ask__go::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    92deg,
+    color-mix(in srgb, var(--hot2) 30%, transparent),
+    transparent 78%
+  );
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--e);
+}
+
+.ask__go > * {
+  position: relative;
+}
+
+.ask__go svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+
+/* the travelling tick, same device as the nav underline */
+.ask__go i {
+  width: 15px;
+  height: 1px;
+  background: var(--hot2);
+  transition: width 0.5s var(--e);
+}
+
+.ask__go:hover,
+.ask__go:focus-visible {
+  border-color: var(--hot2);
+}
+
+.ask__go:hover::before,
+.ask__go:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.ask__go:hover i,
+.ask__go:focus-visible i {
+  width: 26px;
+}
+
+@media (max-width: 560px) {
+  .ask__go {
+    flex: 1 0 100%;
+    justify-content: center;
+  }
+}
+
+/* ═══ TOUCH ERGONOMICS ════════════════════════════════════════════════
+   Everything here is scoped to coarse pointers. The desktop
+   typography — 9.5px mono labels, tight footer rhythm, 17px link
+   rows — is deliberate and stays exactly as drawn; none of these
+   rules can reach it.
+
+   1 · iOS Safari zooms the whole viewport whenever a focused field is
+       set below 16px. The fields were on --lead (15.5px), so every tap
+       into the contact form jumped the page and the visitor had to
+       pinch back out. 16px is the threshold, not a preference.
+
+   2 · Everything tappable clears 44px. Reached with padding rather
+       than min-height + centring, because several of these links draw
+       their underline in ::after anchored to the BOX — centring the
+       text inside a taller box would strand the rule 20px below the
+       word it belongs to.
+
+   3 · Which is also why .ul re-anchors its underline. Its ::after sits
+       at bottom:0 and the design puts it 2px under the text, so the
+       new bottom padding has to be subtracted back out or the rule
+       drifts away from the word on touch devices only — the kind of
+       thing that never shows up on the machine it was built on. */
+
+@media (pointer: coarse) {
+  /* 1 — the fields */
+  .row input,
+  .row textarea {
+    font-size: 16px;
+  }
+
+  .row input {
+    min-height: 44px;
+  }
+
+  .chip {
+    min-height: 44px;
+  }
+
+  .btn {
+    min-height: 48px;
+  }
+
+  /*  2 — link rows. One custom property drives the hit padding AND the
+         underline anchor, so the two can never disagree. They already
+         did once: .ft__col ul a (0,1,2) quietly outranked .ul (0,1,0),
+         the padding it won did not match the offset ::after had been
+         given, and the underline ended up flush against the word
+         instead of 2px under it — on touch devices only.
+
+         16px clears 44px for every one of these, whose content boxes
+         run 13-17px depending on whether they are mono labels or
+         body-size links. */
+  .ul,
+  .ft__col ul a,
+  .side__row a,
+  a.lb,
+  .ft__base a,
+  .sheet__ft a {
+    --tap: 16px;
+    padding-block: var(--tap);
+  }
+
+  /* the stacked lists trade their gap for the padding, so the rhythm
+     stays even instead of doubling up */
+  .ft__col ul {
+    row-gap: 0;
+  }
+
+  /* 3 — the underline rides the text, not the padding box */
+  .ul::after {
+    bottom: calc(var(--tap, 0px) - 2px);
+  }
+
+  /*  The wordmark and the display-size mail link sit in running layout
+      where padding would shift their neighbours, so they get an
+      invisible expander instead. Nothing adjacent to collide with. */
+  .mk,
+  .mail,
+  .wp__go,
+  .top__more {
+    position: relative;
+  }
+
+  .mk::after,
+  .mail::after,
+  .wp__go::after,
+  .top__more::after {
+    content: "";
+    position: absolute;
+    /* -14 not -13: at -13 the 17px .wp__go row came out 43px, one
+       pixel under the bar, which is not a bar you clear approximately */
+    inset: -14px -10px;
+    background: none;
+    border: 0;
   }
 }

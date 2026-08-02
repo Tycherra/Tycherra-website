@@ -126,7 +126,7 @@ export function Nav() {
         id="nav-sheet"
         ref={sheetRef}
         aria-hidden={!open}
-        {...(!open ? { inert: "" as unknown as boolean } : {})}
+        inert={!open}
       >
         <div className="sheet__in">
           {nav.map((item) => (

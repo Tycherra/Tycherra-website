@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { onScroll } from "@/lib/scroll";
 
 /*  ═══════════════════════════════════════════════════════════════════
@@ -44,22 +44,24 @@ export function decode(el: HTMLElement) {
   return () => clearInterval(id);
 }
 
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 export function Reveal({ scope = "main" }: { scope?: string }) {
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /*  The character split runs in a LAYOUT effect, before the browser
+      paints. In a passive effect the heading painted once as plain text,
+      was then replaced by characters at opacity 0, and only then rose —
+      so switching routes flashed the new page's title for a frame before
+      it disappeared and animated in. Splitting pre-paint means the
+      unsplit text is never shown at all. */
+  useIsoLayoutEffect(() => {
     const root = document.querySelector(scope);
     if (!root) return;
-
-    /* C — character rise. Split once, on mount. */
     root.querySelectorAll<HTMLElement>("[data-chars]").forEach((el) => {
       if (el.dataset.split === "1") return;
       el.dataset.split = "1";
       const text = el.textContent ?? "";
       el.textContent = "";
-      /*  F2 — 38ms is the house stagger, but a long heading would push
-          the run past the 1.2s ceiling. The delay is capped so the last
-          character always starts within 240ms and the whole rise lands
-          under 1.2s, whatever the heading says. */
       const step = Math.min(24, 150 / Math.max(1, text.length - 1));
       text.split("").forEach((c, i) => {
         if (c === " ") {
@@ -73,6 +75,12 @@ export function Reveal({ scope = "main" }: { scope?: string }) {
         el.appendChild(span);
       });
     });
+  }, [scope]);
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const root = document.querySelector(scope);
+    if (!root) return;
 
     if (reduced) {
       /* everything arrives already resolved */

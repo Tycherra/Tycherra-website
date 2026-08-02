@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!--  The mark is the wordmark's own device: the T stem with the
+        bearing dot riding off its shoulder, on the void, over the
+        heat. Drawn rather than a letter so it survives at 16px. -->
+  <defs>
+    <linearGradient id="h" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#4a0a20"/>
+      <stop offset=".55" stop-color="#a81030"/>
+      <stop offset="1" stop-color="#d8863a"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="13" fill="#07070a"/>
+  <rect x="0" y="52" width="64" height="12" rx="0" fill="url(#h)" opacity=".85"/>
+  <path d="M14 18h30" stroke="#f2eee6" stroke-width="6" stroke-linecap="square"/>
+  <path d="M29 18v28" stroke="#f2eee6" stroke-width="6" stroke-linecap="square"/>
+  <circle cx="48" cy="18" r="5.5" fill="none" stroke="#a81030" stroke-width="3.4"/>
+</svg>
