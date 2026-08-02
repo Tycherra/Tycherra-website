@@ -42,14 +42,17 @@
   opacity: 1;
 }
 
-/* C — character rise. Exactly one heading per page. .95s */
+/*  C — character rise. Exactly one heading per page.
+    Shortened from .95s: at that length, plus the stagger, the page
+    heading took over a second to finish arriving and read as slow to
+    load rather than as a reveal. The whole run now lands in ~0.75s. */
 .chr {
   display: inline-block;
   transform: translateY(0.62em) rotate(3.5deg);
   opacity: 0;
   transition:
-    transform 0.95s var(--e),
-    opacity 0.7s var(--e);
+    transform 0.62s var(--e),
+    opacity 0.42s var(--e);
 }
 
 .on .chr,
@@ -550,9 +553,20 @@
 
 /* ═══ 5 · THE CURSOR ══════════════════════════════════════════════ */
 
+/*  The size is not decoration. A <canvas> is a replaced element, and a
+    fixed replaced element with `inset: 0` but no declared width or
+    height resolves to its INTRINSIC size — the width/height attributes,
+    which the driver sets to viewport x devicePixelRatio. On a 2x screen
+    that made this box 2880x1800 CSS pixels pinned at the top left, so
+    the backing-store transform put every stroke at twice the cursor's
+    offset and the trail drew far below and to the right of the pointer.
+    Declaring the box makes the CSS pixel and the client coordinate the
+    same unit again. */
 #trail {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 955;
   pointer-events: none;
 }

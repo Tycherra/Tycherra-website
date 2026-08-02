@@ -134,8 +134,17 @@ export function Cursor({ heroSelector }: { heroSelector: string }) {
             const dt = Math.max(8, now - lt);
             const d = Math.hypot(e.clientX - lx, e.clientY - ly);
             const speed = (d / dt) * 16; // px per frame-equivalent
-            /* only genuinely fast strokes count toward the charge */
-            if (speed > 26) swing = Math.min(1.6, swing + (speed - 26) * 0.0075);
+            /*  It is an easter egg, so it has to be genuinely hard to
+                trip. The old gate — 26px/frame, building at .0075 —
+                lit up on any brisk move across the page, which is
+                exactly the thing PART 3.3 says it must not do.
+
+                Now it takes a real swipe: nothing counts below 70px per
+                frame-equivalent, the charge accrues about a third as
+                fast, and it has to be sustained past 1.15 before a
+                single pixel is drawn. One quick flick cannot reach it —
+                only several strokes in a row can. */
+            if (speed > 70) swing = Math.min(2.2, swing + (speed - 70) * 0.0026);
           }
           lx = e.clientX;
           ly = e.clientY;
@@ -151,9 +160,11 @@ export function Cursor({ heroSelector }: { heroSelector: string }) {
           raf = requestAnimationFrame(f);
           g.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-          swing *= 0.955;
-          const target = swing > 0.55 ? Math.min(1, (swing - 0.55) / 0.65) : 0;
-          charge += (target - charge) * (target > charge ? 0.045 : 0.085);
+          /* and it discharges faster than it charges, so stopping
+             clears it almost at once */
+          swing *= 0.925;
+          const target = swing > 1.15 ? Math.min(1, (swing - 1.15) / 0.75) : 0;
+          charge += (target - charge) * (target > charge ? 0.05 : 0.12);
           if (charge < 0.02) {
             pts.length = 0;
             return;

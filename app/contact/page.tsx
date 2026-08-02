@@ -28,7 +28,11 @@ export const metadata: Metadata = {
   title: "Contact us",
   description: contact.lead,
   alternates: { canonical: "/contact" },
-  openGraph: { title: `Contact us — ${site.mark}`, description: contact.lead },
+  openGraph: {
+    title: `Contact us — ${site.mark}`,
+    description: contact.lead,
+    url: `${site.url}/contact`,
+  },
 };
 
 export default function ContactPage() {

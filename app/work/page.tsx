@@ -36,7 +36,11 @@ export const metadata: Metadata = {
   title: "Work",
   description: workPage.lead,
   alternates: { canonical: "/work" },
-  openGraph: { title: `Work — ${site.mark}`, description: workPage.lead },
+  openGraph: {
+    title: `Work — ${site.mark}`,
+    description: workPage.lead,
+    url: `${site.url}/work`,
+  },
 };
 
 export default function WorkPage() {

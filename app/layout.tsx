@@ -68,17 +68,26 @@ export const metadata: Metadata = {
     title: `${site.mark} — ${site.short}`,
     description: site.position,
   },
-  twitter: {
-    card: "summary_large_image",
-    title: `${site.mark} — ${site.short}`,
-    description: site.position,
-  },
+  /*  Card type only. Declaring title/description here pinned every
+      route's Twitter card to the HOME copy — a shared /work link
+      previewed as "Tycherra° — Websites, web applications…". Left
+      unset, Next resolves them from each page's own title and
+      description, which is what they should always have been. */
+  twitter: { card: "summary_large_image" },
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   formatDetection: { telephone: false, address: false, email: false },
+  keywords: [
+    "software studio",
+    "web development Bengaluru",
+    ...site.services.map((s) => s.toLowerCase()),
+    "Next.js development",
+    "product engineering",
+  ],
+  category: "technology",
 };
 
 export const viewport: Viewport = {
@@ -112,6 +121,15 @@ const jsonLd = {
       },
     },
     {
+      "@type": "WebSite",
+      "@id": `${site.url}#website`,
+      url: site.url,
+      name: site.mark,
+      description: `${site.position} ${site.short}`,
+      inLanguage: "en",
+      publisher: { "@id": `${site.url}#organization` },
+    },
+    {
       "@type": "LocalBusiness",
       "@id": `${site.url}#studio`,
       name: site.name,
@@ -133,6 +151,15 @@ const jsonLd = {
         longitude: site.coords.lon,
       },
       areaServed: "Worldwide",
+      knowsAbout: [...site.services],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Studio services",
+        itemListElement: site.services.map((s) => ({
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", name: s, provider: { "@id": `${site.url}#organization` } },
+        })),
+      },
       openingHoursSpecification: {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],

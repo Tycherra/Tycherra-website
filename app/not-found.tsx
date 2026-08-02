@@ -22,6 +22,7 @@ const station = stations["/404"];
 export const metadata: Metadata = {
   title: notFound.h1,
   description: notFound.line,
+  /* a 404 must never enter an index */
   robots: { index: false, follow: true },
 };
 

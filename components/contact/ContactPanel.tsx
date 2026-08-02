@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { lockIn } from "@/lib/lockin-engine";
 import { contact } from "@/content/contact";
+import { site } from "@/content/site";
+import { WhatsApp } from "@/components/ui/Glyph";
 
 /*  ═══════════════════════════════════════════════════════════════════
     THE PANEL — PART 4.4 / 6.4.
@@ -177,6 +179,26 @@ export function ContactPanel() {
       <p className="f__err" role="status" aria-live="polite">
         {error}
       </p>
+
+      {/*  The immediate route, alongside the considered one. It sits
+           under the send row rather than in the aside list because a
+           visitor who does not want to write a brief decides that while
+           looking at the brief, not three columns away. */}
+      <div className="ask">
+        <span className="ask__rule" aria-hidden="true" />
+        <span className="lb ask__lb">{contact.whatsapp.rule}</span>
+        <a
+          className="ask__go"
+          href={site.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <WhatsApp />
+          <span>{contact.whatsapp.action}</span>
+          <i aria-hidden="true" />
+        </a>
+        <span className="lb ask__note">{contact.whatsapp.note}</span>
+      </div>
     </form>
   );
 }

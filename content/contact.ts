@@ -88,6 +88,20 @@ export const contact = {
   fields,
 
   button: "Send it over",
+
+  /*  The form is the considered route; this is the immediate one. Some
+      visitors will not write a brief at 11pm — they want to ask one
+      question and get an answer, and burying that in the aside list
+      loses them. */
+  whatsapp: {
+    /*  Not "Or reach us directly" — the aside already opens with that
+        exact line, and two identical labels a column apart read as a
+        mistake. This one names the reason a visitor would skip the
+        brief rather than repeating the destination. */
+    rule: "Prefer to just ask",
+    action: "Message us on WhatsApp",
+    note: "Straight through to the studio",
+  },
   hint: {
     idle: "Fill the required rows to send",
     ready: "Ready to send",

@@ -144,7 +144,13 @@ export function Hero() {
             const k = Math.max(0, 1 - d / R);
             const e = k * k * k; // a pool, not a wash
 
-            el.style.fontVariationSettings = `"wght" ${Math.round(400 + e * 400)}`;
+            /*  No weight modulation. The heading is set at 800 and the
+                lens used to write `wght 400` into every glyph on the
+                first pointermove, so the whole line visibly dropped to a
+                lighter cut the moment the cursor moved. The resting
+                state has to be the state it loads in. Warmth and lift
+                carry the lens instead — they start from nothing, so
+                there is no jump to make. */
             el.style.transform = `translateY(${(-e * 7).toFixed(2)}px)`;
             if (e > 0.01) {
               const c = ramp(0.42 + e * 0.55);

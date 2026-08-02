@@ -32,7 +32,11 @@ export const metadata: Metadata = {
   title: "About",
   description: about.lead,
   alternates: { canonical: "/about" },
-  openGraph: { title: `About — ${site.mark}`, description: about.lead },
+  openGraph: {
+    title: `About — ${site.mark}`,
+    description: about.lead,
+    url: `${site.url}/about`,
+  },
 };
 
 export default function AboutPage() {
